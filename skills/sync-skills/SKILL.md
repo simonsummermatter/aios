@@ -1,6 +1,6 @@
 ---
 name: sync-skills
-targets: [claude, gemini]
+targets: [claude]
 has_assets: false
 description: >
   Sync AI skills from the local clone of the aios repo into this harness. Triggered by
@@ -14,7 +14,7 @@ description: >
 
 Read skill definitions from the local checkout of `github.com/simonsummermatter/aios` and write the matching `SKILL.md` files (plus assets, plus hooks) into **this harness's own paths only**.
 
-Each tool (Claude Code, Gemini CLI, future Codex) runs `/sync-skills` independently. A tool MUST NEVER write to another tool's harness — it only syncs skills whose `targets:` list includes itself.
+Each tool (Claude Code, future Codex) runs `/sync-skills` independently. A tool MUST NEVER write to another tool's harness — it only syncs skills whose `targets:` list includes itself.
 
 ## When to use
 
@@ -45,26 +45,24 @@ Every `SKILL.md` starts with YAML frontmatter:
 ```yaml
 ---
 name: <skill-name>             # must equal the parent directory name
-targets: [claude, gemini]      # array; supported values: claude, gemini, codex
+targets: [claude]              # array; supported values: claude, codex
 has_assets: false              # boolean; controls whether assets/ is rsynced
 description: >
   ...
 ---
 ```
 
-If a skill's frontmatter is missing `targets`, treat as `[claude, gemini, codex]` (sync everywhere). If `has_assets` is missing, treat as `false`.
+If a skill's frontmatter is missing `targets`, treat as `[claude, codex]` (sync everywhere). If `has_assets` is missing, treat as `false`.
 
 ## Harness path map
 
 | Harness | SKILL.md target path | Hook config | Hooks supported |
 |---------|----------------------|-------------|-----------------|
 | claude  | `~/.claude/skills/<name>/SKILL.md` | `~/.claude/settings.json` | yes |
-| gemini  | `~/.gemini/extensions/portable-skills/skills/<name>/SKILL.md` | n/a | no |
 | codex   | TBD — skip until configured | TBD | TBD |
 
 **Detect the current harness** from where THIS `SKILL.md` is being executed:
 - If the running skill file's path matches `*/.claude/skills/sync-skills/SKILL.md` → harness is `claude`
-- If it matches `*/.gemini/extensions/portable-skills/skills/sync-skills/SKILL.md` → harness is `gemini`
 - Otherwise → abort and ask the user which harness this is
 
 ## Steps
@@ -144,7 +142,7 @@ Hooks: A installed, B updated, C unchanged, D harness does not support hooks
 
 - **Never edit hook configs by hand.** The source of truth is the per-skill `## Hook Enforcement` section in the repo. To change hooks, edit the SKILL.md and re-sync.
 - **Do NOT auto-remove hooks** when a skill loses its Hook Enforcement section. Report orphaned hooks (matchers in `settings.json` that no live skill claims) so the user can decide manually.
-- **Never write to another harness's path.** Claude must not write to `~/.gemini/...`; Gemini must not write to `~/.claude/...`. The harness-detection step gates this.
+- **Never write to another harness's path.** A harness only writes to its own target path (Claude → `~/.claude/...`). The harness-detection step gates this.
 
 ## Error handling
 
@@ -152,6 +150,6 @@ Hooks: A installed, B updated, C unchanged, D harness does not support hooks
 - `git pull` fails (network, divergent history, conflict) → abort, surface git's exit code and stderr. Do not stash, do not force-update.
 - A `skills/<name>/SKILL.md` has malformed YAML frontmatter → skip that skill, report "skipped — frontmatter malformed".
 - A skill's `name:` field doesn't match its directory name → skip, report the mismatch.
-- A skill's `targets:` field is missing or empty → treat as `[claude, gemini, codex]` (sync everywhere).
+- A skill's `targets:` field is missing or empty → treat as `[claude, codex]` (sync everywhere).
 - `~/.claude/settings.json` exists but is not valid JSON → stop hook installation entirely, do not attempt merge, report the file path so the user can repair it manually.
 - A skill's Hook Enforcement section exists but the JSON code block is malformed → skip hook install for that skill, report "hook install error: invalid JSON".

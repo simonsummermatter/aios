@@ -1,6 +1,6 @@
 ---
 name: project-documentation-for-ai-collaboration
-targets: [claude, gemini]
+targets: [claude]
 has_assets: false
 description: >
   Use this skill when starting work on any project repository shared between humans and AI agents.

@@ -1,6 +1,6 @@
 ---
 name: mail-on-point
-targets: [claude, gemini]
+targets: [claude]
 has_assets: false
 description: >
   Use this skill whenever the user wants to write, draft, or compose any kind of message — emails, letters, Slack messages, SMS, or WhatsApp. Triggers include: "schreib eine Mail", "draft an email", "verfasse ein Schreiben", "write a message", or any request to compose communication to another person. Follows Swiss Standard German spelling conventions (no ß), UK English for English documents, and a structured format with greeting, positive connection, main request, details, next steps, and closing.

@@ -1,6 +1,6 @@
 ---
 name: ob1
-targets: [claude, gemini]
+targets: [claude]
 has_assets: false
 description: Invoke for explicit Open Brain memory search — when the user types `/ob1 TOPIC`, says "search memory for X", "check ob1 for X", "what do I know about X", "pull up context on X", or asks what's stored about a past project, server, decision, fix, preference, or framework. Also invoke when user asks "what is new in ob1" or "what's new in open brain" (search the database for recent entries). Also invoke when user types bare `/ob1` with no topic (review current conversation for noteworthy content to store). Also invoke proactively at the very start of any session — ob1 is the memory layer for all AI interactions, not just technical ones. The CLAUDE.md always-active protocol handles background storing; this skill adds the explicit search-and-display layer on top.
 ---

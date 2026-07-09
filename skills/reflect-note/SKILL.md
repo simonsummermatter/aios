@@ -1,60 +1,126 @@
 ---
 name: reflect-note
-targets: [claude, gemini]
+targets: [claude]
 has_assets: false
 description: >
-  Use this skill for ANY interaction with Reflect Notes — reading, searching, writing, or appending. This includes: saving/noting/adding content to daily or standalone notes ("notiere in Reflect", "füge in Reflect hinzu", "note in Reflect", "add to Reflect", "save to Reflect"); reading or searching notes ("was steht in Reflect", "search Reflect", "find in Reflect", "zeig mir meine Reflect Note"); or any use of reflect-notes MCP tools (search_notes, get_note, get_daily_note, append_to_daily_note, create_note). Always read this skill BEFORE calling any reflect-notes MCP tool or REST API — it contains critical rules about deep links that must be followed on every interaction.
+  Use this skill for ANY interaction with Reflect Notes — reading, searching, writing, or appending. This includes: saving/noting/adding content to daily or standalone notes ("notiere in Reflect", "füge in Reflect hinzu", "note in Reflect", "add to Reflect", "save to Reflect"); reading or searching notes ("was steht in Reflect", "search Reflect", "find in Reflect", "zeig mir meine Reflect Note"); or any use of the `reflect` CLI (today, search, show, path, open). Always read this skill BEFORE calling the reflect CLI or editing a graph file — it contains the placement, node, and deep-link rules that must be followed on every interaction.
 ---
 
 # Reflect Note Skill
 
 Read and write content in the user's Reflect notes.
 
+Reflect Open is **local-first and markdown-backed**. There is no MCP server and no
+REST API anymore — the old `reflect-notes` MCP and `reflect.app/api` are gone.
+Everything now goes through:
+
+- **Reading / searching / resolving** → the read-only `reflect` CLI.
+- **Writing / editing** → editing the note's markdown file directly. The running
+  Reflect app watches the graph folder and re-imports your edits.
+
+## The graph and the CLI
+
+Single graph, a folder of markdown notes:
+
+    /Users/simonsummermatter/Library/Mobile Documents/iCloud~app~reflect/Documents/simonsummermatter
+
+The `reflect` CLI is bundled in the app (not on PATH by default):
+
+    /Applications/Reflect Beta.app/Contents/MacOS/reflect
+
+Always target the graph explicitly. Export it once for a sequence of calls:
+
+    export REFLECT_GRAPH="/Users/simonsummermatter/Library/Mobile Documents/iCloud~app~reflect/Documents/simonsummermatter"
+
+Then call e.g. `reflect today`, or pass `--graph "<path>"` on each call.
+
+### CLI commands
+
+    reflect today              # print today's daily note
+    reflect today --path       # its absolute path (works before the file exists)
+    reflect search <query>     # ranked full-text search over the graph
+    reflect show <note>        # print a note by date, path, title, or alias
+    reflect path <note>        # resolve a note to its absolute path
+    reflect open <note>        # open the note in the Reflect app (returns a reflect:// url)
+
+- Add `--json` to any command for stable machine-readable output (field names and
+  exit codes are the automation contract).
+- `<note>` resolves in order: `YYYY-MM-DD` date, graph-relative path, title, then
+  alias (case-insensitive).
+- Exit codes: `0` ok, `1` runtime error, `2` usage, `3` not found or private,
+  `4` search index missing (open the graph in Reflect once to rebuild it).
+
+### Privacy
+
+Notes with `private: true` frontmatter are invisible through the CLI by design.
+Never work around this by reading graph files directly unless the user explicitly
+asks for that note.
+
 ## Pre-flight Checklist — Apply BEFORE Any Write/Edit/Delete
 
-Before calling ANY Reflect write/edit/delete tool (MCP or REST), confirm:
+Before editing any graph file, confirm:
 
-1. **listName**: `append_to_daily_note` calls MUST use `listName: "[[AI Assistant]]"`. No exceptions. (Mechanically enforced via hook on Claude Code; skill-only rule on Gemini CLI and Claude Desktop / iPhone.)
-2. **Node search done**: For daily-note writes that obviously belong under a `#node`, you must have searched (`search_notes(query: "#node ➡️", searchType: "text", limit: 100)`) and selected the matching node. When in doubt → no node, just `[[AI Assistant]]`.
-3. **Point 2 (new standalone notes)**: When calling `create_note`, the new note MUST end up reachable. See "Creating a Standalone Note — Backlink Rule (Point 2)" below.
-4. **No tags**: Never emit `#tag` syntax in any write. If a literal `#word` is needed, wrap it in backticks so it renders as inline code (e.g. `` `#example` ``). Tags clutter Simon's tag list.
+1. **Placement**: New daily-note content goes under a top-level `- [[AI Assistant]]`
+   bullet. No exceptions. (Mechanically reminded via an Edit/Write hook on Claude
+   Code.)
+2. **Node search done**: For daily-note writes that obviously belong under a
+   `#node`, you must have searched (`reflect search "#node ➡️" --json`) and selected
+   the matching node. When in doubt → no node, just `[[AI Assistant]]`.
+3. **Point 2 (new standalone notes)**: A new standalone note MUST end up reachable.
+   See "Creating a Standalone Note — Backlink Rule (Point 2)" below.
+4. **No tags**: Never emit `#tag` syntax in any write. If a literal `#word` is
+   needed, wrap it in backticks so it renders as inline code (e.g. `` `#example` ``).
+   Tags clutter Simon's tag list.
 
-These rules apply to MCP tools, REST API fallback, and every edit/delete operation on existing Reflect content. Edit/delete operations: confirm the placement still follows the rules after your change.
+Edit/delete operations: confirm the placement still follows these rules after your change.
 
 ## Reading vs. Writing — Pick the Right Tool
 
-| Action | Primary Tool | Fallback |
-|--------|-------------|----------|
-| **Read / Search** | MCP `reflect-notes:search_notes` | — (no REST fallback for reading) |
-| **Get daily note** | MCP `reflect-notes:get_daily_note` | — |
-| **Get note by ID** | MCP `reflect-notes:get_note` | — |
-| **Write to daily note** | MCP `reflect-notes:append_to_daily_note` | REST API `PUT /daily-notes` |
-| **Create standalone note** | MCP `reflect-notes:create_note` | REST API `POST /notes` |
+| Action | How |
+|--------|-----|
+| **Read / Search** | `reflect search <query>` (ranked index) |
+| **Get daily note** | `reflect today` or `reflect show <YYYY-MM-DD>` |
+| **Get note by title/path** | `reflect show <note>` |
+| **Resolve a note to a file** | `reflect path <note>` |
+| **Write to daily note** | resolve `reflect today --path`, then edit the `.md` file |
+| **Append to existing note** | resolve `reflect path <note>`, then edit the `.md` file |
+| **Create standalone note** | write a new `notes/<slug>.md` file |
+| **Open in the app** | `reflect open <note>` |
 
-**MCP-first rule:** Always try writing via the MCP server first. Only fall back to the REST API if the MCP tools are unavailable (e.g. MCP server not connected, tool call fails with a connection error). If the MCP tool returns a proper error about invalid input, fix the input — don't switch to REST.
+**The CLI never writes.** To change a note, edit the file the CLI resolves; the
+running app picks the edit up. Unlike the old append-only REST API, you can now
+**append to existing standalone notes** — just edit the file.
 
-## API Limitations
+## Note file format
 
-The Reflect REST API is **append-only by design** — notes are end-to-end encrypted, so the server cannot read existing note contents. This has two important consequences:
+Notes are bullet-outline markdown. Indentation is **2 spaces per level**.
 
-1. **No reading via REST API** — always use the MCP server for reading/searching.
-2. **No appending to existing standalone notes** — there is no endpoint to append to a note that already exists. The only write options are:
-   - Append to a daily note (works great via MCP or REST)
-   - Create a *new* standalone note (does not modify existing ones)
+- **Daily notes**: `daily/YYYY-MM-DD.md`. Content is a bullet outline; AI writes go
+  under a top-level `- [[AI Assistant]]` bullet:
 
-If the user asks to add content to an existing standalone note, explain this limitation and offer alternatives:
-- Append to today's daily note instead (with a backlink to the relevant note)
-- Create a new note with a related title
+  ```
+  - [[AI Assistant]]
+    - [[➡️ NodeName]]
+      - Your note text here
+  ```
 
-**Official API documentation:** https://reflect.academy/api
-**Full endpoint reference:** https://openpm.ai/packages/reflect
+- **Standalone notes**: `notes/<kebab-slug>.md`, with optional `---\nid: "..."\n---`
+  frontmatter, a `# Title` H1, then a bullet body:
 
-## Config
+  ```
+  ---
+  id: "..."
+  ---
 
-- **Graph ID**: `{graph-id}`
-- **API Key** (REST fallback only): `${REFLECT_API_TOKEN}`
-- **Base URL** (REST fallback only): `https://reflect.app/api`
-- **Date format for MCP search**: English with ordinal, e.g. `"Thu 5th March 2026"`
+  # Project Alpha
+
+  - first point
+  - second point
+  ```
+
+  Do **not** fabricate an `id` — omit the frontmatter and let the Reflect app assign
+  the id when it adopts the new file. The filename is a lowercase, hyphenated slug of
+  the title (e.g. "Project Alpha" → `project-alpha.md`).
 
 ## Tasks vs. Checkboxes — Kritischer Unterschied
 
@@ -79,300 +145,240 @@ Reflect unterscheidet **zwei fundamentally verschiedene** Typen von Checkboxen:
 - [x] Erledigte Checkbox (eckig)
 ```
 
-**Scheduling von Tasks:** Tasks in Daily Notes erscheinen standardmässig als "Current". Durch Backlink auf eine andere Daily Note werden sie "Upcoming" (Zukunft) oder "Overdue" (Vergangenheit).
+**Scheduling von Tasks:** Tasks in Daily Notes erscheinen standardmässig als
+"Current". Durch Backlink auf eine andere Daily Note werden sie "Upcoming"
+(Zukunft) oder "Overdue" (Vergangenheit).
 
 ## Deep Links — ALWAYS Include When Referencing a Note
 
-Whenever a Reflect note is mentioned, found via search, or written to, ALWAYS provide a clickable Markdown link in the response. No exceptions.
+Whenever a Reflect note is mentioned, found via search, or written to, ALWAYS
+provide a clickable link in the response. No exceptions.
 
-**URL schema:**
+Reflect Open uses `reflect://` deep links (the old `https://reflect.app/g/...` web
+URLs are no longer the canonical scheme):
+
 ```
-https://reflect.app/g/{graph-id}/{noteId}
+reflect://daily/YYYY-MM-DD          # daily notes — construct directly from the date
+reflect://note/<hash-id>            # standalone notes — get via `reflect open <note> --json`
 ```
 
-The `noteId` comes directly from the MCP search result field `Note ID`.
-
-**Daily notes** have a noteId in the format `DDMMYYYY`, e.g.:
-- 7th March 2026 → `https://reflect.app/g/{graph-id}/07032026`
-- 12th February 2026 → `https://reflect.app/g/{graph-id}/12022026`
-
-**Regular and link notes** have a longer noteId (hash), e.g.:
-- `https://reflect.app/g/{graph-id}/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
-- `https://reflect.app/g/{graph-id}/link-<hash>`
+- **Daily notes**: construct the link yourself, e.g. 21 March 2026 →
+  `reflect://daily/2026-03-21`. No app launch needed.
+- **Standalone notes**: run `reflect open <note> --json` and read the `url` field
+  (this also launches the app). If launching is undesirable, reference the note by
+  its title instead and offer to open it.
 
 **Format always as a Markdown hyperlink**, e.g.:
-`[Daily Note — 7th March 2026](https://reflect.app/g/{graph-id}/07032026)`
-`[Erika Mustermann](https://reflect.app/g/{graph-id}/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)`
+`[Daily Note — 21 March 2026](reflect://daily/2026-03-21)`
+`[Project Alpha](reflect://note/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)`
 
-**RULE: Never mention a note by name without its link. Always construct the link from the Note ID returned by the MCP.**
+**RULE: Never mention a note by name without a link.**
 
-## Reading (MCP Server)
+## Reading (CLI)
 
-Use `reflect-notes:search_notes`:
-- `query`: search term — for daily notes use the English date format above
-- `searchType`: `"text"` for exact match, `"vector"` for semantic search
-- `limit`: number of results (default 3)
+**Search** — `reflect search <query> --json` returns ranked `results[]` with
+`path`, `title`, `snippet`, `score`. Use it instead of grepping the graph.
 
-Use `reflect-notes:get_daily_note`:
-- `date`: ISO format `YYYY-MM-DD`
+**Daily note** — `reflect today` (today) or `reflect show <YYYY-MM-DD>` (any date).
+`--json` returns `date`, `path`, `absolutePath`, `title`, `content`.
 
-Use `reflect-notes:get_note`:
-- `noteId`: the unique note identifier
+**Any note** — `reflect show <title|path|alias>`; `reflect path <note>` for just the
+absolute path.
 
-## Writing — Primary Method (MCP Server)
+Date phrasing for the user's daily notes is `YYYY-MM-DD` for the CLI (the old
+English-ordinal search format is no longer needed).
+
+## Writing — Daily Note
 
 ### Node System (2nd Brain / PARA)
 
-The user's PKM uses **nodes** — tagged with `#node` and named with a `➡️` prefix (e.g. `➡️ AOMIForward`). Each node is like a folder in the PARA system (Projects, Areas, Resources, Archive). Every piece of information belongs under a node.
+The user's PKM uses **nodes** — tagged with `#node` and named with a `➡️` prefix
+(e.g. `➡️ AOMIForward`). Each node is like a folder in the PARA system (Projects,
+Areas, Resources, Archive). Every piece of information belongs under a node.
 
 **When writing to a daily note:**
 
-- **Always** append under `[[AI Assistant]]` using the `listName` parameter.
-- **If the content obviously belongs to a specific node**, include the node backlink as an intermediate level. The `text` parameter becomes a nested structure: the node backlink on the first line, followed by the actual note as a sub-bullet.
-- **If no node matches**, the `text` parameter is just the plain note text.
+- **Always** place the content under a top-level `- [[AI Assistant]]` bullet.
+- **If the content obviously belongs to a specific node**, nest a `[[➡️ NodeName]]`
+  bullet under `[[AI Assistant]]`, and the note text under that.
+- **If no node matches**, put the plain note text directly under `[[AI Assistant]]`.
 
 **How to match a node:**
-- Before writing, always search for nodes dynamically: `reflect-notes:search_notes(query: "#node ➡️", searchType: "text", limit: 100)`.
-- The node list grows over time — never rely on a hardcoded list. Always look up current nodes via the MCP search above.
-- Scan the returned node names and their summaries. Pick a node only when it's a clear, obvious match for the note content.
+- Before writing, search for nodes dynamically: `reflect search "#node ➡️" --json`.
+- The node list grows over time — never rely on a hardcoded list.
+- Scan the returned node names/snippets. Pick a node only when it's a clear, obvious
+  match for the note content.
 - When in doubt, skip the node and only write under `[[AI Assistant]]`.
 - Only notes tagged `#node` are valid nodes — ignore everything else.
 
-### Append to Daily Note (MCP)
+### Procedure — append to today's daily note
 
-Use `reflect-notes:append_to_daily_note` with:
-- `date` (string, required): ISO 8601 format, e.g. `"2026-03-13"`
-- `text` (string, required): The note content — with or without a node prefix
-- `listName` (string, optional): Always set to `"[[AI Assistant]]"`
+1. Resolve the file: `reflect today --path` (works even before today's file exists).
+2. Read the current file (or create it if `reflect today --path` points at a
+   missing file).
+3. Find the existing top-level `- [[AI Assistant]]` bullet. If none exists, add one.
+4. Append your content under it with **2-space-per-level** indentation, choosing
+   `[[➡️ Node]]` nesting per the node rules above.
+5. Save the file with the Edit/Write tool. The app re-imports it automatically.
+6. Confirm to the user with a `reflect://daily/YYYY-MM-DD` link.
 
-**With node match** (creates three-level nesting):
-```
-append_to_daily_note(
-  date: "2026-03-13",
-  text: "[[➡️ NodeName]]\n  - Your note text here",
-  listName: "[[AI Assistant]]"
-)
-```
-
-This produces:
+**With node match** (three-level nesting):
 ```
 - [[AI Assistant]]
   - [[➡️ NodeName]]
     - Your note text here
 ```
 
-**With multiple sub-bullets under a node** — use `\n    - ` (4 spaces + dash) for each sub-bullet:
-```
-text: "[[➡️ NodeName]]\n  - Parent title\n    - **Label**: first point\n    - **Label**: second point\n    - **Label**: third point"
-```
-
-This produces:
+**With multiple structured sub-bullets under a node:**
 ```
 - [[AI Assistant]]
   - [[➡️ NodeName]]
     - Parent title
-      - Label: first point
-      - Label: second point
-      - Label: third point
+      - **Label**: first point
+      - **Label**: second point
 ```
 
-**Without node match** (creates two-level nesting):
+**Without node match** (two-level nesting):
 ```
-append_to_daily_note(
-  date: "2026-03-13",
-  text: "Your note text here",
-  listName: "[[AI Assistant]]"
-)
+- [[AI Assistant]]
+  - Your note text here
 ```
 
-**Formatting rules (confirmed working):**
+**Formatting rules:**
 - `**text**` → bold
 - `` `text` `` → inline code
-- `\n    - ` (4 spaces + dash) → sub-bullet under parent
-- Never use `·` as a separator — always use `\n    - ` structure
-- Never put multiple points in one long flat bullet — always use sub-bullets for structured content
+- 2 spaces per nesting level
+- Never use `·` as a separator — always nest as sub-bullets
+- Never put multiple points in one long flat bullet — use sub-bullets for structured content
 
-### Create Standalone Note (MCP)
+## Writing — Standalone Note
 
-Use `reflect-notes:create_note` with:
-- `subject` (string, required): Note title
-- `contentMarkdown` (string, optional): Markdown body. Supports `[[Note Title]]` for backlinks and `#tag-name` for tags.
+### Create a standalone note
 
-```
-create_note(
-  subject: "Project Ideas",
-  contentMarkdown: "Some ideas for Q2...\n\n- Idea A\n- Idea B"
-)
-```
+1. Choose a title. Check it doesn't already exist: `reflect show "<Title>" --json`
+   (exit `3` = not found → safe to create; exit `0` = it exists, edit that file
+   instead).
+2. Write a new file `notes/<kebab-slug>.md`:
+   ```
+   # <Title>
 
-If a note with the same subject already exists, the MCP server returns the existing note without modifying it.
+   - first point
+   - second point
+   ```
+   Omit `id:` frontmatter — the app assigns the id on import. Supports
+   `[[Note Title]]` backlinks. Never emit `#tags` (Pre-flight rule 4).
+3. Verify + get the link: `reflect open "<Title>" --json` → use the `url` field.
+4. Apply Point 2 (backlink rule) below.
+
+### Append to an existing standalone note
+
+New in Reflect Open: editing existing notes is allowed (the old REST API couldn't).
+Resolve `reflect path "<Title>"`, read the file, add your bullet(s) in the right
+place, save. Confirm with the note's `reflect://note/<id>` link.
 
 ### Creating a Standalone Note — Backlink Rule (Point 2)
 
 A newly created non-daily note MUST satisfy at least one of:
 
-- **(a) Outgoing backlink**: the note's `contentMarkdown` already contains one or more `[[Note Title]]` references to other non-daily notes.
-- **(b) Known incoming backlink**: another existing non-daily note already links to this one (e.g., the user explicitly said "linked from project X", or you are about to write that link).
-- **(c) Daily-note backlink (default fallback)**: call `append_to_daily_note` with a backlink to the new note under `[[AI Assistant]]`, following the same node-matching rules as any other daily-note write.
+- **(a) Outgoing backlink**: the note body already contains one or more
+  `[[Note Title]]` references to other non-daily notes.
+- **(b) Known incoming backlink**: another existing non-daily note already links to
+  this one (e.g., the user said "linked from project X", or you're about to write
+  that link).
+- **(c) Daily-note backlink (default fallback)**: append to today's daily note under
+  `[[AI Assistant]]` a bullet containing a `[[NewNoteTitle]]` backlink, following the
+  same node-matching rules as any other daily-note write.
 
-**Why:** Reflect's graph value depends on connectivity. Orphan notes are unreachable from Reflect's backlink suggestions and effectively lost.
+**Why:** Reflect's graph value depends on connectivity. Orphan notes are unreachable
+from Reflect's backlink suggestions and effectively lost.
 
-**Procedure after every `create_note`:**
+**Procedure after every note creation:**
 
-1. Inspect the `contentMarkdown` you just wrote — does it already contain a `[[Note Title]]` reference to a non-daily note? → done (case a).
-2. If not, is there a clear context implying an existing or about-to-be-written incoming link? → proceed with that follow-up write (case b).
-3. Otherwise → call `append_to_daily_note` with `listName: "[[AI Assistant]]"`, a suitable node prefix if obvious, and the body containing a `[[NewNoteTitle]]` backlink (case c — default).
-
-**Example — case (c), the default:**
-
-```
-create_note(subject: "Q3 2026 Goals", contentMarkdown: "## Personal\n- ...\n\n## Work\n- ...")
-# After create_note succeeds:
-append_to_daily_note(
-  date: "2026-05-14",
-  text: "[[➡️ Goals]]\n  - [[Q3 2026 Goals]]",
-  listName: "[[AI Assistant]]"
-)
-```
-
-**Same rule applies to REST fallback** (Claude Desktop on iPhone): after `POST /notes`, call `PUT /daily-notes` with a backlink. Skill text is the only enforcement on that harness — no hook reminder.
-
-## Writing — Fallback Method (REST API)
-
-Use the REST API only when the MCP tools are unavailable (server not connected, connection errors). Do not use REST if MCP returned a proper validation error — fix the input instead.
-
-### Append to Daily Note (REST fallback)
-
-```bash
-curl -s -X PUT "https://reflect.app/api/graphs/{graph-id}/daily-notes" \
-  -H "Authorization: Bearer ${REFLECT_API_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "date": "YYYY-MM-DD",
-    "text": "Your note text here",
-    "transform_type": "list-append",
-    "list_name": "[[AI Assistant]]"
-  }'
-```
-
-Parameters:
-- `date` (string, optional): ISO 8601 (e.g. "2026-03-05"). Defaults to today.
-- `text` (string, required): The note content — with or without a node prefix.
-- `transform_type`: Always `"list-append"`.
-- `list_name`: Always `"[[AI Assistant]]"`.
-
-The same node-prefix patterns apply as in the MCP section above.
-
-### Create Standalone Note (REST fallback)
-
-```bash
-curl -s -X POST "https://reflect.app/api/graphs/{graph-id}/notes" \
-  -H "Authorization: Bearer ${REFLECT_API_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "subject": "Note Title",
-    "content_markdown": "Your markdown content here"
-  }'
-```
-
-Parameters:
-- `subject` (string, required): Note title.
-- `content_markdown` (string, required): Markdown body.
-- `pinned` (boolean, optional): Pin the note.
-
-Point 2 (backlink rule) applies here too: after creating the note via REST, also call `PUT /daily-notes` with a backlink under `[[AI Assistant]]` unless the new note's `content_markdown` already contains a non-daily `[[...]]` backlink.
+1. Does the body already contain a `[[Note Title]]` reference to a non-daily note?
+   → done (case a).
+2. Is there a clear existing/about-to-be-written incoming link? → proceed with that
+   write (case b).
+3. Otherwise → append to today's daily note under `[[AI Assistant]]` (suitable node
+   prefix if obvious) a bullet with a `[[NewNoteTitle]]` backlink (case c — default).
 
 ## Examples
 
 **Read today's note:**
-"Was steht heute in Reflect?" → `search_notes(query: "Sat 7th March 2026", searchType: "text", limit: 3)`
-→ Return result with link: [Daily Note — 7th March 2026](https://reflect.app/g/{graph-id}/07032026)
+"Was steht heute in Reflect?" → `reflect today`
+→ Return with link: [Daily Note — 9 July 2026](reflect://daily/2026-07-09)
 
 **Search for a person:**
-"In welcher Note habe ich Notizen über Erika?" → `search_notes(query: "Erika Mustermann")`
-→ Return result with link: [Erika Mustermann](https://reflect.app/g/{graph-id}/{noteId})
+"In welcher Note habe ich Notizen über Erika?" → `reflect search "Erika Mustermann" --json`
+→ Return top hit with link (get its url via `reflect open <title> --json`).
 
-**Daily note — node match (MCP):**
+**Daily note — node match:**
 "Notiere in Reflect dass ich mich um die MWST kümmern muss"
-→ `append_to_daily_note(date: "2026-03-07", text: "[[➡️ MyFinances]]\n  - Muss mich um die MWST kümmern", listName: "[[AI Assistant]]")`
-→ Confirm with link: "Notiert in Reflect unter `[[AI Assistant]]` → `[[➡️ MyFinances]]`. [Daily Note — 7th March 2026](https://reflect.app/g/{graph-id}/07032026)"
+→ `reflect today --path`, read file, add under `- [[AI Assistant]]`:
+```
+  - [[➡️ MyFinances]]
+    - Muss mich um die MWST kümmern
+```
+→ Confirm: "Notiert unter `[[AI Assistant]]` → `[[➡️ MyFinances]]`. [Daily Note — 9 July 2026](reflect://daily/2026-07-09)"
 
-**Daily note — no obvious node (MCP):**
+**Daily note — no obvious node:**
 "Note in Reflect: Remember to call back Martin"
-→ `append_to_daily_note(date: "2026-03-07", text: "Remember to call back Martin", listName: "[[AI Assistant]]")`
-→ Confirm with link: "Notiert. [Daily Note — 7th March 2026](https://reflect.app/g/{graph-id}/07032026)"
-
-**Specific date (MCP):**
-"Add to Reflect on March 10th: Meeting with Anna at 2pm"
-→ `append_to_daily_note(date: "2026-03-10", text: "Meeting with Anna at 2pm", listName: "[[AI Assistant]]")`
-→ Confirm with link: "Notiert. [Daily Note — 10th March 2026](https://reflect.app/g/{graph-id}/10032026)"
+→ add under `- [[AI Assistant]]`: `  - Remember to call back Martin`
 
 **Task hinzufügen (rund, erscheint im Tasks-Tab):**
 "Füge Task in Reflect hinzu: Rechnung an Kunde schicken"
-→ `append_to_daily_note(date: "2026-03-07", text: "+ [ ] Rechnung an Kunde schicken", listName: "[[AI Assistant]]")`
+→ under `- [[AI Assistant]]`: `  - + [ ] Rechnung an Kunde schicken`
 
 **Checkbox-Liste (eckig, nur Scratchpad):**
 "Notiere Einkaufsliste: Milch, Eier, Brot"
-→ `append_to_daily_note(date: "2026-03-07", text: "Einkaufsliste\n  - [ ] Milch\n  - [ ] Eier\n  - [ ] Brot", listName: "[[AI Assistant]]")`
+→ under `- [[AI Assistant]]`:
+```
+  - Einkaufsliste
+    - [ ] Milch
+    - [ ] Eier
+    - [ ] Brot
+```
 
-**Standalone note (MCP):**
+**Standalone note:**
 "Create a new Reflect note titled 'Project Ideas'"
-→ `create_note(subject: "Project Ideas", contentMarkdown: "...")`
-→ Confirm with link using the noteId returned from the MCP response.
-→ Then verify Point 2: ensure the note has a non-daily backlink to/from another note, or write one in today's daily note under `[[AI Assistant]]`.
+→ verify with `reflect show "Project Ideas" --json`, write `notes/project-ideas.md`
+with `# Project Ideas` + body, then verify Point 2 and confirm with the
+`reflect open "Project Ideas" --json` url.
 
-**Fallback example (REST, only when MCP unavailable):**
-If `append_to_daily_note` MCP tool fails with a connection error:
-→ Fall back to `curl -s -X PUT "https://reflect.app/api/graphs/{graph-id}/daily-notes" ...` with the same content
-→ Log that REST fallback was used so the user is aware
+## Git history
+
+Each graph is a Git repo at its root (Reflect commits locally even with no remote).
+Use Git only when the user asks for history, diffs, recovery, or past states:
+
+    git -C "<graph>" log --oneline -- <graph-relative-path>
+    git -C "<graph>" show <rev>:<graph-relative-path>
+
+Do not use Git history to bypass privacy.
 
 ## Hook Enforcement (harness-specific)
 
-The skill text above is the primary rule home — every harness reads and follows it. Where the host harness supports hooks, those hooks provide a mechanical backstop on top of the skill text. Hook installation is performed by `sync-skills` per harness; never edit the harness config by hand.
+The skill text above is the primary rule home — every harness reads and follows it.
+Where the host harness supports hooks, those hooks provide a mechanical backstop on
+top of the skill text. Hook installation is performed by `sync-skills` per harness;
+never edit the harness config by hand.
 
 ### Claude Code (hooks supported)
 
-`sync-skills` merges the following into `~/.claude/settings.json` under the `hooks` key, preserving pre-existing unrelated entries (additive merge — same `matcher` means replace its `hooks` array; new `matcher` means append).
+`sync-skills` merges the following into `~/.claude/settings.json` under the `hooks`
+key, preserving pre-existing unrelated entries (additive merge — same `matcher`
+means replace its `hooks` array; new `matcher` means append). Writes are now plain
+file edits, so the reminder fires whenever an Edit/Write/MultiEdit targets a file
+inside the Reflect graph folder.
 
 ```json
 {
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "mcp__reflect-notes__append_to_daily_note",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r 'if (.tool_input.listName // \"\") == \"[[AI Assistant]]\" then empty else {decision:\"block\", reason:\"Reflect write blocked: listName must be \\\"[[AI Assistant]]\\\" per reflect-note skill Pre-flight Checklist. Re-read the skill and retry.\"} end'"
-          }
-        ]
-      },
-      {
-        "matcher": "mcp__reflect-notes__(update_note_subject|replace_text_in_block|insert_at_top|insert_at_bottom|insert_at_position|replace_range|delete_range|toggle_checkbox|update_block_attributes|delete_tag)",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"Editing/deleting Reflect content — confirm reflect-note skill Pre-flight Checklist applies (especially Point 1 placement under [[AI Assistant]]) before proceeding.\"}}'"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r 'if (.tool_input.command // \"\") | test(\"reflect\\\\.app/api\") then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"REST API hit on reflect.app/api detected. On Claude Code the MCP is always available — REST is the iPhone/Claude-Desktop fallback. Did the MCP fail? If yes, investigate. Otherwise switch to MCP.\"}} else empty end'"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "mcp__reflect-notes__create_note",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "printf '%s' '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"Just created a new standalone note. Verify Point 2 (backlink rule) NOW: does the body contain a non-daily [[...]] backlink? If yes → done. If you know another existing non-daily note already links to it → state that explicitly. Otherwise → you MUST call append_to_daily_note with [[AI Assistant]] + suitable node + a [[NewNoteTitle]] backlink before moving on.\"}}'"
+            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — apply the reflect-note skill rules: place new daily content under a top-level `- [[AI Assistant]]` bullet (2 spaces per level); nest a `[[➡️ node]]` when it obviously matches (search `#node ➡️` first); tasks use `+ [ ]`, checkboxes `- [ ]`; never emit `#tags`; a new standalone note needs a backlink (Point 2).\"}} else empty end'"
           }
         ]
       }
@@ -381,16 +387,7 @@ The skill text above is the primary rule home — every harness reads and follow
 }
 ```
 
-What each hook enforces:
-- **PreToolUse `append_to_daily_note` block**: mechanical guarantee of Pre-flight Checklist rule 1 (`listName: "[[AI Assistant]]"`). Cannot be bypassed.
-- **PreToolUse edit/delete reminder**: forced awareness on every Reflect edit so placement rules can't slip when mutating existing content.
-- **PreToolUse Bash anomaly warning**: catches accidental REST API usage on Claude Code where MCP should always be the path.
-- **PostToolUse `create_note` reminder**: forces explicit Point 2 verification after every standalone-note creation.
-
-### Gemini CLI (no hook support)
-
-Gemini CLI does not currently expose a PreToolUse/PostToolUse hook mechanism equivalent to Claude Code. This harness relies on skill text alone. If/when Gemini CLI gains hook support, the equivalent spec will be added here and `sync-skills` extended accordingly.
-
-### Claude Desktop / iPhone (no hook support, REST path)
-
-Claude Desktop has no hook mechanism, and on iPhone it cannot reach the locally-running Reflect MCP — it must use the REST API. Skill text alone is the enforcement here; the Pre-flight Checklist at the top and the REST fallback section above are the only safeguards. Read carefully and follow.
+What the hook enforces:
+- **PreToolUse Edit/Write reminder**: on any edit to a file inside the Reflect graph
+  folder, injects the placement/node/task/tag/Point-2 rules so they can't slip when
+  writing or mutating note content.
