@@ -60,12 +60,21 @@ asks for that note.
 
 Before editing any graph file, confirm:
 
-1. **Placement**: New daily-note content goes under a top-level `- [[AI Assistant]]`
-   bullet. No exceptions. (Mechanically reminded via an Edit/Write hook on Claude
-   Code.)
+1. **Placement**: New daily-note content goes under the `Assistant` heading. Match
+   that heading — and `Links` / `Scratch Pad` — by **name, not by `#` level**: the
+   daily template's heading levels drift between notes (`Assistant` and `Scratch Pad`
+   appear as either `#####` or `######`, and some notes omit `Audio Memos`), so the
+   `#####`/`######` prefixes shown throughout this skill are illustrative only. Find
+   the heading whose text is `Assistant` at any `#` level; do not fail the write
+   because its level differs from the example. If that heading is missing, create it
+   below the `Links` section (after the Links heading and its content) at the **same
+   `#` level as that note's `Links` heading**; if there is no Links heading either,
+   create `##### Assistant` as the first line of the note. Never write under
+   `Scratch Pad` — that is Simon's personal capture area. No exceptions.
+   (Mechanically reminded via an Edit/Write hook on Claude Code.)
 2. **Node search done**: For daily-note writes that obviously belong under a
    `#node`, you must have searched (`reflect search "#node ➡️" --json`) and selected
-   the matching node. When in doubt → no node, just `[[AI Assistant]]`.
+   the matching node. When in doubt → no node, plain bullet under `##### Assistant`.
 3. **Point 2 (new standalone notes)**: A new standalone note MUST end up reachable.
    See "Creating a Standalone Note — Backlink Rule (Point 2)" below.
 4. **No tags**: Never emit `#tag` syntax in any write. If a literal `#word` is
@@ -95,13 +104,28 @@ running app picks the edit up. Unlike the old append-only REST API, you can now
 
 Notes are bullet-outline markdown. Indentation is **2 spaces per level**.
 
-- **Daily notes**: `daily/YYYY-MM-DD.md`. Content is a bullet outline; AI writes go
-  under a top-level `- [[AI Assistant]]` bullet:
+- **Daily notes**: `daily/YYYY-MM-DD.md`. The area above the `---` divider line is
+  the day's gathering zone, organised under headings from the daily template; below
+  the divider is Simon's hand-maintained template (PROJECTS / AREAS / OTHER). The
+  gathering-zone headings and their owners:
 
   ```
-  - [[AI Assistant]]
-    - [[➡️ NodeName]]
-      - Your note text here
+  ##### Links          ← Reflect imports link captures here
+  ###### Audio Memos   ← Reflect imports audio memos here (absent in some notes)
+  ##### Assistant      ← ALL AI writes go here
+  ###### Scratch Pad   ← Simon's personal capture area — never write here
+  ---
+  ```
+
+  The `#` levels above are **illustrative** — they drift between notes. Match each
+  heading by its **name** at any `#` level (see Pre-flight rule 1), and preserve
+  the level a given note uses. AI writes go under the `Assistant` heading:
+
+  ```
+  ##### Assistant
+
+  - [[➡️ NodeName]]
+    - Your note text here
   ```
 
 - **Standalone notes**: `notes/<kebab-slug>.md`, with optional `---\nid: "..."\n---`
@@ -198,17 +222,20 @@ Areas, Resources, Archive). Every piece of information belongs under a node.
 
 **When writing to a daily note:**
 
-- **Always** place the content under a top-level `- [[AI Assistant]]` bullet.
-- **If the content obviously belongs to a specific node**, nest a `[[➡️ NodeName]]`
-  bullet under `[[AI Assistant]]`, and the note text under that.
-- **If no node matches**, put the plain note text directly under `[[AI Assistant]]`.
+- **Always** place the content under the `##### Assistant` heading (a heading from
+  the daily template, not a bullet). New bullets go between that heading and the
+  next heading (e.g. `###### Scratch Pad`).
+- **If the content obviously belongs to a specific node**, start with a top-level
+  `- [[➡️ NodeName]]` bullet under the heading, and the note text nested under that.
+- **If no node matches**, put the note text as a plain top-level bullet directly
+  under the heading.
 
 **How to match a node:**
 - Before writing, search for nodes dynamically: `reflect search "#node ➡️" --json`.
 - The node list grows over time — never rely on a hardcoded list.
 - Scan the returned node names/snippets. Pick a node only when it's a clear, obvious
   match for the note content.
-- When in doubt, skip the node and only write under `[[AI Assistant]]`.
+- When in doubt, skip the node and write a plain bullet under `##### Assistant`.
 - Only notes tagged `#node` are valid nodes — ignore everything else.
 
 ### Procedure — append to today's daily note
@@ -216,32 +243,40 @@ Areas, Resources, Archive). Every piece of information belongs under a node.
 1. Resolve the file: `reflect today --path` (works even before today's file exists).
 2. Read the current file (or create it if `reflect today --path` points at a
    missing file).
-3. Find the existing top-level `- [[AI Assistant]]` bullet. If none exists, add one.
-4. Append your content under it with **2-space-per-level** indentation, choosing
-   `[[➡️ Node]]` nesting per the node rules above.
+3. Find the `Assistant` heading **by name at any `#` level** (per Pre-flight rule
+   1) — do not require a literal `##### Assistant`. If it is missing, create it below
+   the `Links` section (after the Links heading and its content) at the same `#` level
+   as that note's `Links` heading; if there is no Links heading either, create
+   `##### Assistant` as the first line of the note.
+4. Append your content as top-level bullets between the `Assistant` heading and the
+   next heading, with **2-space-per-level** indentation, choosing `[[➡️ Node]]`
+   nesting per the node rules above. Preserve the heading's existing `#` level.
 5. Save the file with the Edit/Write tool. The app re-imports it automatically.
 6. Confirm to the user with a `reflect://daily/YYYY-MM-DD` link.
 
-**With node match** (three-level nesting):
+**With node match**:
 ```
-- [[AI Assistant]]
-  - [[➡️ NodeName]]
-    - Your note text here
+##### Assistant
+
+- [[➡️ NodeName]]
+  - Your note text here
 ```
 
 **With multiple structured sub-bullets under a node:**
 ```
-- [[AI Assistant]]
-  - [[➡️ NodeName]]
-    - Parent title
-      - **Label**: first point
-      - **Label**: second point
+##### Assistant
+
+- [[➡️ NodeName]]
+  - Parent title
+    - **Label**: first point
+    - **Label**: second point
 ```
 
-**Without node match** (two-level nesting):
+**Without node match** (plain top-level bullet):
 ```
-- [[AI Assistant]]
-  - Your note text here
+##### Assistant
+
+- Your note text here
 ```
 
 **Formatting rules:**
@@ -286,8 +321,8 @@ A newly created non-daily note MUST satisfy at least one of:
   this one (e.g., the user said "linked from project X", or you're about to write
   that link).
 - **(c) Daily-note backlink (default fallback)**: append to today's daily note under
-  `[[AI Assistant]]` a bullet containing a `[[NewNoteTitle]]` backlink, following the
-  same node-matching rules as any other daily-note write.
+  the `##### Assistant` heading a bullet containing a `[[NewNoteTitle]]` backlink,
+  following the same node-matching rules as any other daily-note write.
 
 **Why:** Reflect's graph value depends on connectivity. Orphan notes are unreachable
 from Reflect's backlink suggestions and effectively lost.
@@ -298,7 +333,7 @@ from Reflect's backlink suggestions and effectively lost.
    → done (case a).
 2. Is there a clear existing/about-to-be-written incoming link? → proceed with that
    write (case b).
-3. Otherwise → append to today's daily note under `[[AI Assistant]]` (suitable node
+3. Otherwise → append to today's daily note under `##### Assistant` (suitable node
    prefix if obvious) a bullet with a `[[NewNoteTitle]]` backlink (case c — default).
 
 ## Examples
@@ -313,29 +348,29 @@ from Reflect's backlink suggestions and effectively lost.
 
 **Daily note — node match:**
 "Notiere in Reflect dass ich mich um die MWST kümmern muss"
-→ `reflect today --path`, read file, add under `- [[AI Assistant]]`:
+→ `reflect today --path`, read file, add under the `##### Assistant` heading:
 ```
-  - [[➡️ MyFinances]]
-    - Muss mich um die MWST kümmern
+- [[➡️ MyFinances]]
+  - Muss mich um die MWST kümmern
 ```
-→ Confirm: "Notiert unter `[[AI Assistant]]` → `[[➡️ MyFinances]]`. [Daily Note — 9 July 2026](reflect://daily/2026-07-09)"
+→ Confirm: "Notiert unter `##### Assistant` → `[[➡️ MyFinances]]`. [Daily Note — 9 July 2026](reflect://daily/2026-07-09)"
 
 **Daily note — no obvious node:**
 "Note in Reflect: Remember to call back Martin"
-→ add under `- [[AI Assistant]]`: `  - Remember to call back Martin`
+→ add under `##### Assistant`: `- Remember to call back Martin`
 
 **Task hinzufügen (rund, erscheint im Tasks-Tab):**
 "Füge Task in Reflect hinzu: Rechnung an Kunde schicken"
-→ under `- [[AI Assistant]]`: `  - + [ ] Rechnung an Kunde schicken`
+→ under `##### Assistant`: `+ [ ] Rechnung an Kunde schicken`
 
-**Checkbox-Liste (eckig, nur Scratchpad):**
+**Checkbox-Liste (eckig, nur temporär):**
 "Notiere Einkaufsliste: Milch, Eier, Brot"
-→ under `- [[AI Assistant]]`:
+→ under `##### Assistant`:
 ```
-  - Einkaufsliste
-    - [ ] Milch
-    - [ ] Eier
-    - [ ] Brot
+- Einkaufsliste
+  - [ ] Milch
+  - [ ] Eier
+  - [ ] Brot
 ```
 
 **Standalone note:**
@@ -378,7 +413,7 @@ inside the Reflect graph folder.
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — apply the reflect-note skill rules: place new daily content under a top-level `- [[AI Assistant]]` bullet (2 spaces per level); nest a `[[➡️ node]]` when it obviously matches (search `#node ➡️` first); tasks use `+ [ ]`, checkboxes `- [ ]`; never emit `#tags`; a new standalone note needs a backlink (Point 2).\"}} else empty end'"
+            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — apply the reflect-note skill rules: place new daily content under the `##### Assistant` heading (create it below the Links section if missing, or as the first line if there is no Links heading); never write under `###### Scratch Pad`; nest under a top-level `- [[➡️ node]]` bullet when it obviously matches (search `#node ➡️` first); tasks use `+ [ ]`, checkboxes `- [ ]`; never emit `#tags`; a new standalone note needs a backlink (Point 2).\"}} else empty end'"
           }
         ]
       }
@@ -389,5 +424,6 @@ inside the Reflect graph folder.
 
 What the hook enforces:
 - **PreToolUse Edit/Write reminder**: on any edit to a file inside the Reflect graph
-  folder, injects the placement/node/task/tag/Point-2 rules so they can't slip when
-  writing or mutating note content.
+  folder, injects the placement (`##### Assistant` heading, Scratch Pad off-limits)
+  /node/task/tag/Point-2 rules so they can't slip when writing or mutating note
+  content.
