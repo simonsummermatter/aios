@@ -108,9 +108,21 @@ Heading rules:
    (b) an existing non-daily note links to it; or (c) fallback — add a bullet
    with a `[[NewNoteTitle]]` backlink under today's `AI Assistant` heading
    (node-nested if obvious). Orphan notes are unreachable and effectively lost.
+   Note: Point 7 makes a daily-note backlink the **default** on creation anyway, so
+   (c) is effectively always in play — (a)/(b) still matter for permanent, non-daily
+   reachability that survives independent of any one daily note.
 6. **Formatting**: 2-space indentation per level; structured content as
    sub-bullets, never flat mega-bullets or `·` separators; `**bold**`,
    backtick inline code.
+7. **Daily-note activity trail.** After creating **or** substantively editing any
+   non-daily note, add a bullet under today's `AI Assistant` heading: a
+   `[[Note Title]]` backlink plus a few words on what changed. This makes the daily
+   note a running log of what the AI touched, and — for creation — it **supersedes
+   Point 5's "fallback-only" stance**: the daily backlink is the default, not just
+   orphan-prevention. Node-nest the bullet when a `#node` obviously matches.
+   **Exception — skip only for pure formalities** with no content change: tag/label
+   swaps, typo/whitespace/reformatting fixes, re-sorting, or metadata-only edits.
+   When a change mixes substance with formalities, log it.
 
 ## Deep links — ALWAYS include when referencing a note
 
@@ -169,7 +181,7 @@ inside the Reflect graph folder.
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — reflect-note rules: daily-note writes go ONLY under the `AI Assistant` heading (legacy `Assistant`) in the inbox zone below the LAST `---` divider; match the heading by name at any `#` level and preserve its style; if missing, create `## [[AI Assistant]]` at the very end of the note; never change anything above the last divider; never write under `Scratch Pad`, `Links`, or `Audio Memos`; nest under `- [[➡️ node]]` when it obviously matches (search `#node ➡️` first); tasks `+ [ ]`, checkboxes `- [ ]`; never emit `#tags`; new standalone notes need a backlink (Point 2).\"}} else empty end'"
+            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — reflect-note rules: daily-note writes go ONLY under the `AI Assistant` heading (legacy `Assistant`) in the inbox zone below the LAST `---` divider; match the heading by name at any `#` level and preserve its style; if missing, create `## [[AI Assistant]]` at the very end of the note; never change anything above the last divider; never write under `Scratch Pad`, `Links`, or `Audio Memos`; nest under `- [[➡️ node]]` when it obviously matches (search `#node ➡️` first); tasks `+ [ ]`, checkboxes `- [ ]`; never emit `#tags`; new standalone notes need a backlink (Point 2); after creating OR substantively editing any non-daily note, also log it under today's `AI Assistant` heading with a `[[Note Title]]` backlink + what changed (Point 7) — skip only for pure formalities (tag/typo/whitespace/reformatting).\"}} else empty end'"
           }
         ]
       }
