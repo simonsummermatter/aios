@@ -31,7 +31,7 @@ When the user types just `/ob1` with no topic, **do not search** — instead rev
 3. **Confirm** — ask the user which ones to store (e.g. "Store all? Or pick numbers?").
 4. **Store** — if there are 2 or more confirmed entries, call `batch_store_memories(memories=[...])` with all of them in a single call. Only use `store_memory()` for a single entry.
 
-**Filter aggressively** — only surface things that would genuinely help a future AI with zero context. Skip anything already in code, docs, or git history.
+**Filter aggressively** — only surface things that would genuinely help a future AI with zero context. Skip anything already in code, docs, or git history. **Never propose a real, trackable task/to-do as an ob1 candidate** — those belong in Reflect (`+ [ ]`), not ob1; aspirational wishes, if kept, go in as plain descriptive statements, not imperatives (see the "Tasks" split in `~/.claude/CLAUDE.md`).
 
 ---
 
