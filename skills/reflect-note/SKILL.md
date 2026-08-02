@@ -103,6 +103,17 @@ Heading rules:
      (Einkaufsliste) when in doubt.
    - Preserve the existing type when moving or editing items. Tasks backlinked
      to another daily note become Upcoming/Overdue.
+   - **Task placement — nest, don't just append.** A task does not automatically
+     drop onto the last row of the `AI Assistant` section. First look at what is
+     already there:
+     - **Matching node** → if a `- [[➡️ node]]` bullet the task obviously belongs
+       under already exists in today's section, nest the task under it (indented
+       `+ [ ]`), rather than adding a fresh top-level task.
+     - **Obvious home in existing content** → if the section already holds
+       structure (a node, an item with sub-bullets) and it is obvious where the
+       task fits, put it there. Do it — don't ask.
+     - **No fitting home** → only then does the task go as a top-level `+ [ ]` at
+       the end of the section.
 5. **Point 2 — a new standalone note must be reachable.** At least one of:
    (a) its body contains a `[[Note Title]]` backlink to a non-daily note;
    (b) an existing non-daily note links to it; or (c) fallback — add a bullet
@@ -111,9 +122,18 @@ Heading rules:
    Note: Point 7 makes a daily-note backlink the **default** on creation anyway, so
    (c) is effectively always in play — (a)/(b) still matter for permanent, non-daily
    reachability that survives independent of any one daily note.
-6. **Formatting**: 2-space indentation per level; structured content as
-   sub-bullets, never flat mega-bullets or `·` separators; `**bold**`,
-   backtick inline code.
+6. **Formatting — structured, not flat.** 2-space indentation per level;
+   `**bold**`, backtick inline code; never `·` separators or flat mega-bullets
+   (a single bullet carrying a whole paragraph is the anti-pattern to avoid).
+   - **Action-title first.** Lead each item with a one-liner that stands on its
+     own — an **action title** in `**bold**` whenever the item captures
+     something done, decided, or fixed (e.g. `**Deployed the review layer to
+     MNEME**`). The reader should get the gist from that first line alone.
+   - **Details as sub-bullets.** Put the supporting detail *underneath* as
+     sub-bullets, not crammed into the lead line. Break it into further nested
+     sub-bullets whenever the content has natural structure (several distinct
+     points, a list, a cause/effect, a caveat). Only genuinely one-line items
+     stay a single bullet with no children.
 7. **Daily-note activity trail.** After creating **or** substantively editing any
    non-daily note, add a bullet under today's `AI Assistant` heading: a
    `[[Note Title]]` backlink plus a few words on what changed. This makes the daily
@@ -145,9 +165,13 @@ confirm with the daily deep link.
 ## [[AI Assistant]]
 
 - [[➡️ NodeName]]
-  - Your note text here
+  - **Action-title one-liner** — the gist in a single line
+    - Supporting detail as a sub-bullet
+    - Another detail, nested further when it has its own structure
+      - a finer point under that detail
+  + [ ] A task that belongs under this node
 - Item with no obvious node
-+ [ ] A real task
++ [ ] A real task with no fitting home
 ```
 
 **Create a standalone note**: `reflect show "<Title>" --json` (exit `3` = free
@@ -181,7 +205,7 @@ inside the Reflect graph folder.
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — reflect-note rules: daily-note writes go ONLY under the `AI Assistant` heading (legacy `Assistant`) in the inbox zone below the LAST `---` divider; match the heading by name at any `#` level and preserve its style; if missing, create `## [[AI Assistant]]` at the very end of the note; never change anything above the last divider; never write under `Scratch Pad`, `Links`, or `Audio Memos`; nest under `- [[➡️ node]]` when it obviously matches (search `#node ➡️` first); tasks `+ [ ]`, checkboxes `- [ ]`; never emit `#tags`; new standalone notes need a backlink (Point 2); after creating OR substantively editing any non-daily note, also log it in the daily note under the `AI Assistant` heading with a `[[Note Title]]` backlink + what changed (Point 7) — skip only for pure formalities (tag/typo/whitespace/reformatting).\"}} else empty end'"
+            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — reflect-note rules: daily-note writes go ONLY under the `AI Assistant` heading (legacy `Assistant`) in the inbox zone below the LAST `---` divider; match the heading by name at any `#` level and preserve its style; if missing, create `## [[AI Assistant]]` at the very end of the note; never change anything above the last divider; never write under `Scratch Pad`, `Links`, or `Audio Memos`; nest under `- [[➡️ node]]` when it obviously matches (search `#node ➡️` first); lead each item with a bold action-title one-liner and put detail in nested sub-bullets, never flat mega-bullets; tasks `+ [ ]`, checkboxes `- [ ]`; nest a task under a matching node or existing content when one obviously fits, not just the last row; never emit `#tags`; new standalone notes need a backlink (Point 2); after creating OR substantively editing any non-daily note, also log it in the daily note under the `AI Assistant` heading with a `[[Note Title]]` backlink + what changed (Point 7) — skip only for pure formalities (tag/typo/whitespace/reformatting).\"}} else empty end'"
           }
         ]
       }
