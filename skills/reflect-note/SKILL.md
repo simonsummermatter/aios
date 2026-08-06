@@ -33,7 +33,8 @@ Export `REFLECT_GRAPH="<graph path>"` once for a sequence of calls, or pass
     reflect search <query>     # ranked full-text search — use instead of grepping the graph
     reflect show <note>        # print a note by date, path, title, or alias
     reflect path <note>        # resolve a note to its absolute path
-    reflect open <note>        # open in the app; --json returns the reflect:// url
+    reflect open <note>        # LAUNCHES the app — only when Simon asks to open a note
+    reflect open <note> --print --json   # the reflect:// url, no app launch (use this for links)
 
 - `--json` on any command gives the stable automation contract (field names, exit codes).
 - `<note>` resolves in order: `YYYY-MM-DD` date → graph-relative path → title → alias.
@@ -150,9 +151,10 @@ Never mention a note without a clickable markdown link:
 
 - **Daily notes**: construct directly — `reflect://daily/YYYY-MM-DD`, e.g.
   `[Daily Note — 21 March 2026](reflect://daily/2026-03-21)`.
-- **Standalone notes**: `reflect open <note> --json` → `url` field
-  (`reflect://note/<id>`). This launches the app; if that is undesirable,
-  reference the note by title and offer to open it.
+- **Standalone notes**: `reflect open <note> --print --json` → `url` field
+  (`reflect://note/<id>`). **Always pass `--print`** — without it the command
+  launches the Reflect app, which Simon does not want as a side effect of a
+  workflow. Drop `--print` only when he explicitly asks to open a note.
 
 ## Procedures
 
@@ -178,7 +180,7 @@ confirm with the daily deep link.
 to create; `0` = exists — edit that file instead) → write
 `notes/<kebab-slug>.md` containing `# <Title>` and a bullet body. Do **not**
 fabricate `id:` frontmatter — the app assigns the id on import. Apply Point 2 →
-confirm with the `reflect open` url.
+confirm with the note's deep link (`reflect open <note> --print --json` → `url`).
 
 **Append to a standalone note**: `reflect path "<Title>"` → edit the file →
 confirm with its deep link.

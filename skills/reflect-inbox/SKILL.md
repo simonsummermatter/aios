@@ -56,6 +56,9 @@ All `reflect-note` pre-flight rules apply, plus:
    capture note under `Links` — treat it as a backlink.
 6. **Always** end the confirmation with the daily deep link:
    `[Daily Note — Xth Month YYYY](reflect://daily/YYYY-MM-DD)`.
+7. **Never launch the Reflect app.** A `/Reflect-inbox` run must not open a
+   window. Daily links are constructed by hand; any `reflect open` call for a
+   note url must carry `--print`.
 
 ## Workflow
 
@@ -149,7 +152,8 @@ front and save.
 
 - One line per cluster: *"`[[➡️ NodeName]]` ← N item(s)"*.
 - Standalone notes that got `[[Context & Remarks:]]`, each with its deep link
-  (`reflect open "<title>" --json` → `url`).
+  (`reflect open "<title>" --print --json` → `url`). **`--print` is mandatory** —
+  without it the command launches the Reflect app at the end of the run.
 - The daily deep link, and: *"Review and tick `[[Reflect tidied]]` when you're
   satisfied."*
 - Empty inbox / nothing restructured → say so plainly, skip the write.
