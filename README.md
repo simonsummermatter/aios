@@ -42,7 +42,8 @@ No string-blob parsing. One file in, one file out, byte-for-byte.
 Some skills (notably `reflect-note` and `reflect-inbox`) reference external configuration that lives outside this repo. [Reflect](https://reflect.app) Open is local-first and markdown-backed: there is no MCP server or REST API. Reading goes through a bundled CLI, and writing is done by editing the note files directly.
 
 - **Reflect graph path** — the local folder of markdown notes that is the user's graph. Each user supplies their own path (e.g., exported as `REFLECT_GRAPH` or passed via `--graph`, set in their CLAUDE.md or equivalent harness-level instructions).
-- **`reflect` CLI** — the read-only CLI bundled inside the Reflect app (not on `PATH` by default). The skills call it to read, search, and resolve notes; writes edit the resolved `.md` file, which the running app re-imports automatically.
+- **`reflect` CLI** — the read-only CLI bundled inside the Reflect app (not on `PATH` by default). The skills call it to read, search, and resolve notes; writes edit the resolved `.md` file, which the running app re-imports automatically. One gotcha: `reflect open <note>` *launches the app* as a side effect of returning a `reflect://` url — the skills always pass `--print` so a workflow never pops a window open.
+- **`reflect://` url handler** — deep links resolve through the OS to whichever Reflect build is registered for the scheme. On a machine with more than one Reflect install, verify that the intended build is the handler.
 
 ## License
 
