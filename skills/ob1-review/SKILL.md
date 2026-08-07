@@ -38,15 +38,21 @@ Resolve these without consulting Simon, then **report what was auto-resolved** s
 
 Never auto-resolve anything else. Real work and open design questions always reach the picker.
 
-### 3. Classify the remainder into three buckets
+### 3. Classify the remainder into five states
 
-| Bucket | What it looks like | What happens |
+| State | What it looks like | What happens |
 |---|---|---|
 | **promote** | a concrete next step Simon would actually do | → Reflect `+ [ ]` task, then cleared from ob1 |
-| **clear** | a rule, constraint, prohibition, settled decision, or something already done | cleared from ob1, nothing goes to Reflect |
-| **defer** | a genuine intention, too vague to action *yet* | action flag cleared, memory text stays as a plain statement |
+| **defer** | a genuine intention, too vague to action *yet* | → bullet in the Reflect note `[[Open Questions]]` under its project heading, then cleared from ob1 |
+| **clear** | already done, contingent on work that has not started, or otherwise not a task | cleared from ob1, nothing written |
+| **rule** | a policy/constraint the extractor wrongly rendered as a to-do | same action as clear, separate label |
+| **explain** | Simon wants more context before deciding | **not** resolved — comes back to the agent |
 
-The distinction that matters most in practice: a **constraint on work that has not started** ("ensure VLAN 22 is in the allow-list *when* hardening is applied") is `clear`, not `promote`. The network-design memories are full of these.
+**Why `rule` is its own label.** Mechanically it is `clear`. Diagnostically it is evidence: the extractor fix of 2026-08-03 only suppressed rules-as-tasks for `fact`/`decision`/`person_note` memories, so a nonzero `rule` count at the end of a sweep means `event`/`decision` types are still generating them and the server-side rule needs extending. Folded into `clear`, that signal is invisible. Pre-set it — Simon should rarely have to press `r`.
+
+**Why `defer` writes to Reflect.** Deferring must not mean forgetting. ob1 has no snooze field (`resolve_action_item` only removes), so a deferred item that is merely cleared silently disappears from view. Writing it to `[[Open Questions]]` first means the queue still drains while the open question waits where Simon will meet it — when he opens that project, not during an unrelated sweep. Group bullets under a per-project heading; if a cluster outgrows the note, give it its own project note.
+
+The distinction that matters most in practice: a **constraint on work that has not started** ("ensure VLAN 22 is in the allow-list *when* hardening is applied") is `rule`, not `promote`. The network-design memories are full of these.
 
 ### 4. Hand the remainder to the picker
 
@@ -66,9 +72,13 @@ Write a proposal file and open it:
             "context": "one or two sentences of the parent memory"}]}
 ```
 
-The picker opens in its own Ghostty window (macOS cannot start the emulator from the CLI, so the runner goes through `open -na`; the command needs a real tty, which the agent's Bash tool does not provide). Simon clicks a row to cycle `promote → clear → defer`, or uses `p`/`c`/`d`, then `a` to apply. `out.json` appears with the confirmed dispositions.
+The picker opens in its own Ghostty window (macOS cannot start the emulator from the CLI, so the runner goes through `open -na`; the command needs a real tty, which the agent's Bash tool does not provide).
 
-Wait for it with a backgrounded `until [ -f out.json ]; do sleep 2; done` — not a Monitor, since it is a single completion event.
+Controls: left-click or `←`/`→` cycles all five states in one order; two-finger (right) click marks `explain`; `p` `d` `c` `r` `e` set the row under the cursor directly; `↑`/`↓` and scroll move; `a` applies, `q` quits. On a trackpad the first click moves the cursor and the second acts on the row — that is deliberate, it stops a mis-click from changing a row Simon was not looking at.
+
+Wait for `out.json` with a backgrounded `until [ -f out.json ]; do sleep 2; done` — not a Monitor, since it is a single completion event.
+
+`status` in `out.json` is `applied`, `cancelled`, or `interrupted`. **`interrupted` means Simon closed the window** — the dispositions are still there and are worth re-offering as the proposals of the next round. Do not treat it as an empty result and do not apply it unasked.
 
 **Write a real `note` on every borderline row.** It is the only context Simon gets while clicking, and it is what makes a 30-row batch take 30 seconds. Flag explicitly where the proposal is weak ("ob1 #793 parked this — flip to defer if you disagree").
 
@@ -77,8 +87,10 @@ Keep batches to ~30 rows. Sub-items of one task (`#827[0-4]`) stay separate rows
 ### 5. Apply
 
 - **promote** → write the Reflect task per the `reflect-note` skill, then `resolve_action_item(memory_id, item_index, "promoted-to-reflect")`.
+- **defer** → add the bullet to `[[Open Questions]]` first, then `resolve_action_item(memory_id, item_index, "not-yet-ready")`. Never resolve before the note is written.
 - **clear** → `resolve_action_item(memory_id, item_index, "not-a-task")`.
-- **defer** → `resolve_action_item(memory_id, item_index, "not-yet-ready")`.
+- **rule** → `resolve_action_item(memory_id, item_index, "not-a-task-policy")`.
+- **explain** → resolve nothing. Write the fuller background for each and reopen the picker with just those rows, richer `context`, and a revised `proposal`.
 - **parked fallback** → once the task is safely in Reflect, `delete_memory(id)`.
 
 **Mind the index shift.** `resolve_action_item` removes one element, so remaining indices on the *same* memory shift down. Resolve the **highest index first**, or re-run `list_action_items` between resolves.
