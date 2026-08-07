@@ -45,6 +45,15 @@ Some skills (notably `reflect-note` and `reflect-inbox`) reference external conf
 - **`reflect` CLI** — the read-only CLI bundled inside the Reflect app (not on `PATH` by default). The skills call it to read, search, and resolve notes; writes edit the resolved `.md` file, which the running app re-imports automatically. One gotcha: `reflect open <note>` *launches the app* as a side effect of returning a `reflect://` url — the skills always pass `--print` so a workflow never pops a window open.
 - **`reflect://` url handler** — deep links resolve through the OS to whichever Reflect build is registered for the scheme. On a machine with more than one Reflect install, verify that the intended build is the handler.
 
+## Interactive assets
+
+A skill's `assets/` may ship an executable, not just data. `ob1-review` ships `picker.py`, a terminal UI the user drives with mouse and keyboard, plus `run_picker.sh` to launch it. Two constraints shape anything of this kind:
+
+- **The agent's shell has no tty.** A harness runs commands with captured stdio, so a full-screen UI cannot run there. It has to open in a terminal window of its own, and the agent waits for a result file rather than reading stdout.
+- **On macOS, Ghostty cannot start the emulator from its CLI** (`ghostty -e …` is documented as unsupported there, and `+new-window` refuses). The launcher goes through `open -na Ghostty.app --args … -e …` instead. A port to another terminal only needs `run_picker.sh` replaced.
+
+`rsync -a` preserves the executable bit, so assets stay runnable after a sync. Interactive assets should write their result file even when killed — closing the window sends `SIGHUP`, and without a handler the user's work is lost silently.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
