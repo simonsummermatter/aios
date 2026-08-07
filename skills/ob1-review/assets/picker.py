@@ -65,7 +65,14 @@ class Picker:
         """Flatten items into screen lines, remembering which item each belongs to."""
         lines = []
         width = self.w - GUTTER - 1
+        section = None
         for idx, it in enumerate(self.items):
+            # Section headers exist so auto-resolved rows are always on screen
+            # rather than resolved behind Simon's back. They are not selectable.
+            if it.get("section") and it["section"] != section:
+                section = it["section"]
+                bar = f"── {section} "
+                lines.append((f"{DIM}{bar}{'─' * max(0, self.w - len(bar) - 3)}{RESET}", None, False))
             label, colour = BADGE[it["disposition"]]
             # The id has to be inside the wrap, not prepended after it — otherwise
             # the head line runs past the terminal width, wraps, and pushes the

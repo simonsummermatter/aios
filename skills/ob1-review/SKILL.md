@@ -26,9 +26,11 @@ Two rules shape the whole workflow:
 
 Also run `search_memory("To reconcile into Reflect")` to catch **parked fallbacks** — real tasks stored in ob1 because Reflect was unreachable at capture time. They belong in Reflect now.
 
-### 2. Auto-resolve the safe classes — no questions asked
+### 2. Pre-decide the safe classes — but always show them
 
-Resolve these without consulting Simon, then **report what was auto-resolved** so he can veto:
+These three classes need no thought from Simon, so decide them yourself. **Never resolve them silently.** They go into the picker like everything else, in their own section at the top (`"section": "auto-resolved · evidence in each row · flip any you disagree with"`), pre-set, so a wrong call costs one click instead of vanishing unseen.
+
+The `note` on each of these rows **must name the memory that proves it** — "DONE — #880 records you deleting both fields on 2026-08-05", not "already done". The evidence is the entire point of showing the row; without it Simon is just being asked to rubber-stamp. If you cannot cite the proof, it is not a safe class — move it to the decision section.
 
 | Class | Test | Disposition |
 |---|---|---|
@@ -36,7 +38,9 @@ Resolve these without consulting Simon, then **report what was auto-resolved** s
 | **Duplicate** | the same item text appears on another memory in the queue | `"duplicate-of-#N[i]"` — keep one, resolve the rest |
 | **Past-dated review** | the item *is* a date that has passed ("Simon reviews the draft on 2026-08-01") | `"stale-review-date"` |
 
-Never auto-resolve anything else. Real work and open design questions always reach the picker.
+Nothing else may be pre-decided. Real work and open design questions reach the picker with no proposal stronger than a guess.
+
+Keep the pre-decided rows' `resolve_as` (e.g. `done-superseded-by-#880`) in your own items file — the picker only returns the five states, so the precise disposition string is joined back on `(memory_id, item_index)` at apply time. If Simon flipped the row, his choice wins and `resolve_as` is discarded.
 
 ### 3. Classify the remainder into five states
 
