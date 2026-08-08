@@ -126,9 +126,9 @@ Heading rules:
    (b) an existing non-daily note links to it; or (c) fallback — add a bullet
    with a `[[NewNoteTitle]]` backlink under today's `AI Assistant` heading
    (node-nested if obvious). Orphan notes are unreachable and effectively lost.
-   Note: Point 7 makes a daily-note backlink the **default** on creation anyway, so
-   (c) is effectively always in play — (a)/(b) still matter for permanent, non-daily
-   reachability that survives independent of any one daily note.
+   Note: Point 7 keeps (c) in play as the **default on creation** — one line, no
+   more. (a)/(b) still matter for permanent, non-daily reachability that survives
+   independent of any one daily note.
 6. **Formatting — structured, not flat.** 2-space indentation per level;
    `**bold**`, backtick inline code; never `·` separators or flat mega-bullets
    (a single bullet carrying a whole paragraph is the anti-pattern to avoid).
@@ -141,15 +141,25 @@ Heading rules:
      sub-bullets whenever the content has natural structure (several distinct
      points, a list, a cause/effect, a caveat). Only genuinely one-line items
      stay a single bullet with no children.
-7. **Daily-note activity trail.** After creating **or** substantively editing any
-   non-daily note, add a bullet under today's `AI Assistant` heading: a
-   `[[Note Title]]` backlink plus a few words on what changed. This makes the daily
-   note a running log of what the AI touched, and — for creation — it **supersedes
-   Point 5's "fallback-only" stance**: the daily backlink is the default, not just
-   orphan-prevention. Node-nest the bullet when a `#node` obviously matches.
-   **Exception — skip only for pure formalities** with no content change: tag/label
-   swaps, typo/whitespace/reformatting fixes, re-sorting, or metadata-only edits.
-   When a change mixes substance with formalities, log it.
+7. **The daily note is never an automatic mirror.** Write to it when Simon asks
+   for a note, and in exactly one other case: **a newly created standalone note**
+   gets a single reachability bullet (Point 5c) — the `[[Note Title]]` backlink
+   plus a handful of words on what it is, node-nested when a `#node` matches.
+   That is the whole of the automatic surface.
+   - **Do not log edits to existing notes.** Rewriting, restructuring, condensing
+     or extending a note that already exists produces **no** daily-note bullet
+     unless Simon asked for one. The record of that work belongs in ob1, in the
+     note itself, and in git — mirroring it into the daily note a second time is
+     the noise this rule exists to prevent.
+   - **Do not narrate session work.** Decisions taken, files touched, commits
+     made, things verified and skills updated are not daily-note content on their
+     own. Simon asks for what he wants kept.
+   - **Point 6's expansion rule does not apply to these bullets.** A reachability
+     bullet is one line, full stop. Point 6 governs content Simon asked to be
+     written down, not the pointer left behind by a note's creation.
+   - When Simon *does* ask for something to be noted, give him the current
+     context in full per Point 6 — the ceiling above is about unrequested
+     automatic writes, never about a write he requested.
 
 ## Deep links — ALWAYS include when referencing a note
 
@@ -214,7 +224,7 @@ inside the Reflect graph folder.
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — reflect-note rules: daily-note writes go ONLY under the `AI Assistant` heading (legacy `Assistant`) in the inbox zone below the LAST `---` divider; match the heading by name at any `#` level and preserve its style; if missing, create `## [[AI Assistant]]` at the very end of the note; never change anything above the last divider; never write under `Scratch Pad`, `Links`, or `Audio Memos`; nest under `- [[➡️ node]]` when it obviously matches (search `#node ➡️` first); lead each item with a bold action-title one-liner and put detail in nested sub-bullets, never flat mega-bullets; tasks `+ [ ]`, checkboxes `- [ ]`; nest every task under the DEEPEST bullet carrying its context — a task that follows from one item is a CHILD of that item (one level deeper, after its detail sub-bullets), never a sibling of it; node level only for tasks about the whole node; top-level only when nothing fits; never emit `#tags`; new standalone notes need a backlink (Point 2); after creating OR substantively editing any non-daily note, also log it in the daily note under the `AI Assistant` heading with a `[[Note Title]]` backlink + what changed (Point 7) — skip only for pure formalities (tag/typo/whitespace/reformatting).\"}} else empty end'"
+            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — reflect-note rules: daily-note writes go ONLY under the `AI Assistant` heading (legacy `Assistant`) in the inbox zone below the LAST `---` divider; match the heading by name at any `#` level and preserve its style; if missing, create `## [[AI Assistant]]` at the very end of the note; never change anything above the last divider; never write under `Scratch Pad`, `Links`, or `Audio Memos`; nest under `- [[➡️ node]]` when it obviously matches (search `#node ➡️` first); lead each item with a bold action-title one-liner and put detail in nested sub-bullets, never flat mega-bullets; tasks `+ [ ]`, checkboxes `- [ ]`; nest every task under the DEEPEST bullet carrying its context — a task that follows from one item is a CHILD of that item (one level deeper, after its detail sub-bullets), never a sibling of it; node level only for tasks about the whole node; top-level only when nothing fits; never emit `#tags`; new standalone notes need a backlink (Point 2); the daily note is NOT an automatic mirror (Point 7) — a NEWLY CREATED standalone note gets ONE reachability bullet ([[Note Title]] + a handful of words, no sub-bullets), and edits to existing notes plus session narration (decisions, files touched, commits, verifications, skill updates) get NOTHING unless Simon asked for it; when he DID ask, write it in full per Point 6.\"}} else empty end'"
           }
         ]
       }

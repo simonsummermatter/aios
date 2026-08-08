@@ -142,11 +142,35 @@ Consolidate on the Reflect side: several ob1 items that are steps of one job bec
 
 ## Logging the sweep
 
-Append a one-line summary to the `[[OB1 tidied]]` note (via `reflect-note`), and log it under today's daily `AI Assistant` heading per `reflect-note` Point 7:
+A sweep makes exactly **four** kinds of Reflect write. Nothing else — a sweep is
+housekeeping, and `reflect-note` Point 7 bars automatic session narration:
 
-> 2026-08-07 — swept 33 items: 5 auto-resolved, 11 → Reflect, 17 cleared/deferred, 2 memories corrected. Queue now N memories / M items.
+1. **Promoted tasks** — `+ [ ]` under *their own* node, placed per `reflect-note`.
+2. **Deferred bullets** — into `[[OB1 Memories: Open Questions]]`.
+3. **The habit line** — one line appended to `[[OB1 tidied]]`.
+4. **One daily-note line**, and only one — see below.
 
-**Only log a sweep that finished.** A batch that came back `interrupted` or `cancelled`, or one whose Reflect writes were not made, is not a sweep — leave `[[OB1 tidied]]` untouched and say so in the chat instead. A log line claiming work that did not happen is worse than no line.
+### The daily-note line
+
+**Always nested under `- [[➡️ PersonalKnowledgeMgmt]]`** — the sweep is PKM
+housekeeping regardless of which nodes the individual items touched. One bullet,
+no sub-bullets:
+
+```
+- [[➡️ PersonalKnowledgeMgmt]]
+  - **Swept the ob1 queue** — 71 items · 3 → Reflect · 2 → [[OB1 Memories: Open Questions]] · 66 resolved. Queue now empty.
+```
+
+Carry only what Simon cannot reconstruct later: **how many items**, **how many
+became tasks**, **how many were parked**, and **what is left in the queue**. The
+per-item reasoning, the proofs, the memory ids and the tooling changes are
+already in ob1 and in the picker log — do not restate them here. If a memory was
+corrected via the `wrong` loop, add `· N memories corrected` to the same line.
+
+**Only log a sweep that finished.** A batch that came back `interrupted` or
+`cancelled`, or one whose Reflect writes were not made, is not a sweep — leave
+`[[OB1 tidied]]` and the daily note untouched and say so in the chat instead. A
+log line claiming work that did not happen is worse than no line.
 
 ---
 
@@ -172,3 +196,4 @@ Append a one-line summary to the `[[OB1 tidied]]` note (via `reflect-note`), and
 | row marked `defer` | write `[[OB1 Memories: Open Questions]]` first → `## [[➡️ Node]]` → topic bullet (say "topic", never "project") |
 | row marked `wrong` | resolve nothing — correct the memory in chat, then re-triage the item |
 | picker came back `interrupted` | re-offer as next round's proposals; do **not** log a sweep |
+| logging the sweep | 4 writes only: promoted tasks · defer bullets · `[[OB1 tidied]]` line · **one** daily line under `- [[➡️ PersonalKnowledgeMgmt]]` |
