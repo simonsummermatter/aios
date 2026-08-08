@@ -51,7 +51,7 @@ Four are dispositions; two are escalations that come back to you instead of bein
 | State | Key | What it looks like | What happens |
 |---|---|---|---|
 | **promote** | `p` | a concrete next step Simon would actually do | → Reflect `+ [ ]` task, then cleared from ob1 |
-| **defer** | `d` | a genuine intention, too vague to action *yet* | → bullet in the Reflect note `[[Open Questions]]` under its project heading, then cleared from ob1 |
+| **defer** | `d` | a genuine intention, too vague to action *yet* | → bullet in the Reflect note `[[OB1 Memories: Open Questions]]` under its node heading, then cleared from ob1 |
 | **clear** | `c` | already done, contingent on work that has not started, or otherwise not a task | cleared from ob1, nothing written |
 | **rule** | `r` | a policy/constraint the extractor wrongly rendered as a to-do | same action as clear, separate label |
 | **explain** | `e` | Simon wants more context before deciding | **not** resolved — comes back to the agent |
@@ -61,7 +61,16 @@ Four are dispositions; two are escalations that come back to you instead of bein
 
 **Why `rule` is its own label.** Mechanically it is `clear`. Diagnostically it is evidence: the extractor fix of 2026-08-03 only suppressed rules-as-tasks for `fact`/`decision`/`person_note` memories, so a nonzero `rule` count at the end of a sweep means `event`/`decision` types are still generating them and the server-side rule needs extending. Folded into `clear`, that signal is invisible. Pre-set it — Simon should rarely have to press `r`.
 
-**Why `defer` writes to Reflect.** Deferring must not mean forgetting. ob1 has no snooze field (`resolve_action_item` only removes), so a deferred item that is merely cleared silently disappears from view. Writing it to `[[Open Questions]]` first means the queue still drains while the open question waits where Simon will meet it — when he opens that project, not during an unrelated sweep. Group bullets under a per-project heading; if a cluster outgrows the note, give it its own project note.
+**Why `defer` writes to Reflect.** Deferring must not mean forgetting. ob1 has no snooze field (`resolve_action_item` only removes), so a deferred item that is merely cleared silently disappears from view. Writing it to `[[OB1 Memories: Open Questions]]` first means the queue still drains while the open question waits where Simon will meet it — when he works that node, not during an unrelated sweep.
+
+**How the note is structured.** Two levels, and the top one is **not** free-form:
+
+1. **`## [[➡️ NodeName]]`** — a real Reflect node, found with `reflect search "#node ➡️" --json` per the `reflect-note` node rule. Never invent a heading and never hardcode the node list. No obvious node → put the question under the closest one rather than opening a headless section.
+2. **A bold top-level bullet naming the topic** (`- **Am Wasser / [[ARTEMIS.Server]]**`, `- **Versicherungen**`) — the old free-form headings live on here, one level down. Several topics under one node is normal and wanted: four network-design questions across three locations all sit under `[[➡️ AutoOps]]`.
+
+Call that second level a **topic**, never a "project" — in Simon's PKM, *project* is the PARA bucket `🔴 PROJECTS` and means something else.
+
+Under the topic: the question as a bold one-liner ending in `— ob1 #N`, with the background in nested sub-bullets. If a topic outgrows the note, give it its own standalone note and leave a link.
 
 The distinction that matters most in practice: a **constraint on work that has not started** ("ensure VLAN 22 is in the allow-list *when* hardening is applied") is `rule`, not `promote`. The network-design memories are full of these.
 
@@ -109,7 +118,7 @@ Sub-items of one task (`#827[0-4]`) stay separate rows — the resolve API is pe
 ### 5. Apply
 
 - **promote** → write the Reflect task per the `reflect-note` skill, then `resolve_action_item(memory_id, item_index, "promoted-to-reflect")`.
-- **defer** → add the bullet to `[[Open Questions]]` first, then `resolve_action_item(memory_id, item_index, "not-yet-ready")`. Never resolve before the note is written.
+- **defer** → add the bullet to `[[OB1 Memories: Open Questions]]` first — under the right `## [[➡️ Node]]` heading and topic bullet — then `resolve_action_item(memory_id, item_index, "not-yet-ready")`. Never resolve before the note is written.
 - **clear** → `resolve_action_item(memory_id, item_index, "not-a-task")`.
 - **rule** → `resolve_action_item(memory_id, item_index, "not-a-task-policy")`.
 - **explain** → resolve nothing. Write the fuller background for each and reopen the picker with just those rows, richer `context`, and a revised `proposal`.
@@ -160,5 +169,6 @@ Append a one-line summary to the `[[OB1 tidied]]` note (via `reflect-note`), and
 | more than one batch | re-run with `offset=` until drained |
 | queue size | count **items**, not memories — `list_action_items` pages by memory |
 | batch cap | 30 decision rows · 60 skim rows · never mix past 30 |
+| row marked `defer` | write `[[OB1 Memories: Open Questions]]` first → `## [[➡️ Node]]` → topic bullet (say "topic", never "project") |
 | row marked `wrong` | resolve nothing — correct the memory in chat, then re-triage the item |
 | picker came back `interrupted` | re-offer as next round's proposals; do **not** log a sweep |
