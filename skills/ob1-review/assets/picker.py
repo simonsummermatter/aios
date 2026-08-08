@@ -10,11 +10,19 @@ works regardless of how stdin/stdout are wired.
 
 items.json  {"title": str, "items": [{"memory_id": int, "item_index": int,
                                       "text": str, "context": str,
-                                      "proposal": "promote"|"clear"|"defer",
+                                      "proposal": "promote"|"defer"|"clear"|"rule",
                                       "note": str}]}
-out.json    {"status": "applied"|"cancelled",
+out.json    {"status": "applied"|"cancelled"|"interrupted",
              "items": [{"memory_id": int, "item_index": int,
                         "disposition": str, "text": str}]}
+
+Six states. Four are dispositions the click-cycle walks (promote, defer, clear,
+rule); two are escalations that come back to the agent instead of being resolved
+— `explain` (Simon wants more background) and `wrong` (the underlying memory is
+factually wrong and must be corrected or deleted, not triaged). Escalations are
+deliberately outside the cycle: they are set with `e`/`w` or a right-click, and
+one more click on the row restores the agent's original proposal, so a mis-hit
+costs one click instead of six.
 """
 
 import argparse
@@ -32,9 +40,12 @@ BADGE = {
     "clear":   ("CLEAR  ", "\x1b[2;37m"),
     "rule":    ("RULE   ", "\x1b[35m"),
     "explain": ("EXPLAIN", "\x1b[1;36m"),
+    "wrong":   ("WRONG  ", "\x1b[1;31m"),
 }
-CYCLE = list(BADGE)  # one order everywhere: click, ← and → all walk all five
-KEYS = {"p": "promote", "d": "defer", "c": "clear", "r": "rule", "e": "explain"}
+CYCLE = ["promote", "defer", "clear", "rule"]  # click, ← and → walk these four
+ESCALATE = ("explain", "wrong")  # keyboard / right-click only — never in the cycle
+KEYS = {"p": "promote", "d": "defer", "c": "clear", "r": "rule",
+        "e": "explain", "w": "wrong"}
 RESET, DIM, BOLD, INV = "\x1b[0m", "\x1b[2m", "\x1b[1m", "\x1b[7m"
 GUTTER = 11  # 2 cursor + 7 badge + 2 gap
 
@@ -44,8 +55,13 @@ class Picker:
         self.title = title
         self.items = items
         self.tin, self.tout = tty_in, tty_out
+        # Always open on the first row with the list scrolled to the top — Simon
+        # should never have to find his way to row 1 after the window appears.
         self.cursor = 0
         self.top = 0
+        # Rows the cursor has landed on. Drives the progress bar: "seen", not
+        # "changed", because most rows are correct and get no keystroke at all.
+        self.seen = {0}
         self.dirty = True
         self.resize()
 
@@ -94,10 +110,20 @@ class Picker:
             out[it["disposition"]] += 1
         return out
 
+    def progress(self):
+        """Bar + counter, so a 40-row batch has a visible end from row 1."""
+        n = len(self.items)
+        seen = len(self.seen)
+        bar_w = max(10, min(44, self.w - 40))
+        fill = int(round(bar_w * seen / n))
+        bar = f"\x1b[1;32m{'█' * fill}{RESET}{DIM}{'░' * (bar_w - fill)}{RESET}"
+        tail = f"row {self.cursor + 1}/{n} · {seen} seen · {n - seen} left"
+        return f" {bar} {DIM}{tail}{RESET}"
+
     def render(self):
         lines = self.build_lines()
         ctx_h = 4
-        body_h = self.h - 2 - ctx_h  # header + footer + context pane
+        body_h = self.h - 3 - ctx_h  # header + progress + footer + context pane
         body_h = max(body_h, 3)
 
         # keep the cursor's first line in view
@@ -137,7 +163,9 @@ class Picker:
         for _ in range(ctx_h - 1 - len(ctx)):
             out.append("\x1b[K\r\n")
 
-        hint = " click / ← → cycle · 2-finger = explain · p d c r e · [a]pply · [q]uit"
+        out.append(self.progress() + "\x1b[K\r\n")
+        hint = (" click / ← → cycle p d c r · [w]rong = fix the memory · [e]xplain"
+                " · [a]pply · [q]uit")
         out.append(f"{DIM}{hint[:self.w - 1]}{RESET}\x1b[K\x1b[J")
         self.tout.write("".join(out))
         self.tout.flush()
@@ -146,8 +174,15 @@ class Picker:
 
     def cycle(self, idx, backwards=False):
         it = self.items[idx]
-        step = -1 if backwards else 1
-        it["disposition"] = CYCLE[(CYCLE.index(it["disposition"]) + step) % len(CYCLE)]
+        cur = it["disposition"]
+        if cur in ESCALATE:
+            # Escalations sit outside the cycle, so cycling off one returns the
+            # row to what the agent proposed — one click undoes a mis-hit w/e.
+            proposal = it.get("proposal")
+            it["disposition"] = proposal if proposal in CYCLE else CYCLE[0]
+        else:
+            step = -1 if backwards else 1
+            it["disposition"] = CYCLE[(CYCLE.index(cur) + step) % len(CYCLE)]
         self.dirty = True
 
     def label(self, idx, disposition):
@@ -156,6 +191,12 @@ class Picker:
 
     def move(self, delta):
         self.cursor = max(0, min(len(self.items) - 1, self.cursor + delta))
+        self.seen.add(self.cursor)
+        self.dirty = True
+
+    def goto(self, idx):
+        self.cursor = max(0, min(len(self.items) - 1, idx))
+        self.seen.add(self.cursor)
         self.dirty = True
 
     def click(self, row):
@@ -165,8 +206,7 @@ class Picker:
             if idx == self.cursor:
                 self.cycle(idx)
             else:
-                self.cursor = idx
-                self.dirty = True
+                self.goto(idx)
 
     def read_event(self):
         ch = self.tin.read(1)
@@ -198,7 +238,8 @@ class Picker:
             if kind == "M" and btn == 2:  # right-click flags for explanation
                 return ("rclick", row)
             return ("key", "")
-        return ("key", {"A": "up", "B": "down", "C": "right", "D": "left"}.get(rest[0], ""))
+        return ("key", {"A": "up", "B": "down", "C": "right", "D": "left",
+                        "H": "home", "F": "end"}.get(rest[0], ""))
 
     def run(self):
         while True:
@@ -211,7 +252,7 @@ class Picker:
             elif kind == "rclick":
                 i = val - 2
                 if 0 <= i < len(self.line_map) and self.line_map[i] is not None:
-                    self.cursor = self.line_map[i]
+                    self.goto(self.line_map[i])
                     self.label(self.cursor, "explain")
             elif kind == "scroll":
                 self.move(val)
@@ -230,12 +271,10 @@ class Picker:
                     self.cycle(self.cursor, backwards=True)
                 elif val in KEYS:
                     self.label(self.cursor, KEYS[val])
-                elif val == "G":
-                    self.cursor = len(self.items) - 1
-                    self.dirty = True
-                elif val == "g":
-                    self.cursor = 0
-                    self.dirty = True
+                elif val in ("G", "end"):
+                    self.goto(len(self.items) - 1)
+                elif val in ("g", "home"):
+                    self.goto(0)
 
 
 def load(path):
@@ -297,7 +336,10 @@ def main():
     status = "interrupted"
     try:
         tty.setraw(fd)
-        tout.write("\x1b[?1049h\x1b[?25l\x1b[?1000h\x1b[?1006h")
+        # Clear the alternate screen before the first frame: Ghostty can open with
+        # shell output already on it, which would push the list down and leave the
+        # cursor row off-screen instead of on row 1.
+        tout.write("\x1b[?1049h\x1b[2J\x1b[H\x1b[?25l\x1b[?1000h\x1b[?1006h")
         tout.flush()
         status = p.run()
     except KeyboardInterrupt:

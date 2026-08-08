@@ -51,8 +51,9 @@ A skill's `assets/` may ship an executable, not just data. `ob1-review` ships `p
 
 - **The agent's shell has no tty.** A harness runs commands with captured stdio, so a full-screen UI cannot run there. It has to open in a terminal window of its own, and the agent waits for a result file rather than reading stdout.
 - **On macOS, Ghostty cannot start the emulator from its CLI** (`ghostty -e …` is documented as unsupported there, and `+new-window` refuses). The launcher goes through `open -na Ghostty.app --args … -e …` instead. A port to another terminal only needs `run_picker.sh` replaced.
+- **`open -na` starts the new window in `$HOME`, not the caller's cwd**, so every path handed to it must be absolute. `run_picker.sh` resolves both of its arguments itself rather than calling `realpath`, which is absent on some macOS installs and would fail anyway on the output path, since that file does not exist yet. A relative path here fails inside a window the user then has to close by hand.
 
-`rsync -a` preserves the executable bit, so assets stay runnable after a sync. Interactive assets should write their result file even when killed — closing the window sends `SIGHUP`, and without a handler the user's work is lost silently.
+`rsync -a` preserves the executable bit, so assets stay runnable after a sync. Interactive assets should write their result file even when killed — closing the window sends `SIGHUP`, and without a handler the user's work is lost silently. `picker.py` also clears the alternate screen before its first frame: Ghostty can open with shell output already on it, which otherwise pushes the list down and leaves the cursor row off-screen.
 
 ## License
 
