@@ -129,18 +129,42 @@ Heading rules:
    Note: Point 7 keeps (c) in play as the **default on creation** — one line, no
    more. (a)/(b) still matter for permanent, non-daily reachability that survives
    independent of any one daily note.
-6. **Formatting — structured, not flat.** 2-space indentation per level;
-   `**bold**`, backtick inline code; never `·` separators or flat mega-bullets
-   (a single bullet carrying a whole paragraph is the anti-pattern to avoid).
+6. **Formatting — the structure follows the amount of content.** 2-space
+   indentation per level; `**bold**`, backtick inline code; never `·`
+   separators. **There is no target bullet count.** Never pad an item out to
+   fill a shape, and never dump rich content as one flat mega-bullet or a big
+   text block (a single bullet carrying a whole paragraph stays the
+   anti-pattern).
    - **Action-title first.** Lead each item with a one-liner that stands on its
      own — an **action title** in `**bold**` whenever the item captures
      something done, decided, or fixed (e.g. `**Deployed the review layer to
-     MNEME**`). The reader should get the gist from that first line alone.
-   - **Details as sub-bullets.** Put the supporting detail *underneath* as
-     sub-bullets, not crammed into the lead line. Break it into further nested
-     sub-bullets whenever the content has natural structure (several distinct
-     points, a list, a cause/effect, a caveat). Only genuinely one-line items
-     stay a single bullet with no children.
+     MNEME**`). The reader should get the gist from that first line alone. The
+     bold lead stays even when the item is a single line.
+   - **Little content → ONE bullet, ideally one line.** No sub-bullets, no
+     invented detail, no restating the lead line underneath itself. This holds
+     in two cases: Simon asked for a **short note** ("kurze Notiz", "short
+     note", "kurz") — then one line is **mandatory** — or the content is simply
+     small, in which case one line is the natural result and the item must not
+     be inflated to three or four bullets.
+   - **Much content → break it down.** Only when the content is genuinely rich,
+     put the supporting detail *underneath* as sub-bullets, nested further
+     whenever it has natural structure (several distinct points, a list, a
+     cause/effect, a caveat). Rich content is always decomposed into nested
+     bullets — never allowed to grow into a block of prose.
+   - **Node nesting survives brevity.** A short note keeps its
+     `- [[➡️ NodeName]]` parent bullet when a node obviously matches, with the
+     one-line item beneath it. Two lines total is the correct result; the node
+     is never dropped to save a line.
+   - **ob1 references — `ob1: 1170 / 1123`.** Numbers only, prefixed once with
+     `ob1:`, separated by ` / `. **NEVER write `#1170`** — a leading `#` creates
+     a Reflect tag, and unrequested tags are never acceptable (Point 3). A short
+     note that references ob1 stays short: the one-line summary plus the
+     numbers, nothing else.
+
+   ```
+   - [[➡️ AutoOps]]
+     - **GAIA reboot erledigt** — ob1: 1204 / 1207        ← short note: one line
+   ```
 7. **The daily note is never an automatic mirror.** Write to it when Simon asks
    for a note, and in exactly one other case: **a newly created standalone note**
    gets a single reachability bullet (Point 5c) — the `[[Note Title]]` backlink
@@ -224,7 +248,7 @@ inside the Reflect graph folder.
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — reflect-note rules: daily-note writes go ONLY under the `AI Assistant` heading (legacy `Assistant`) in the inbox zone below the LAST `---` divider; match the heading by name at any `#` level and preserve its style; if missing, create `## [[AI Assistant]]` at the very end of the note; never change anything above the last divider; never write under `Scratch Pad`, `Links`, or `Audio Memos`; nest under `- [[➡️ node]]` when it obviously matches (search `#node ➡️` first); lead each item with a bold action-title one-liner and put detail in nested sub-bullets, never flat mega-bullets; tasks `+ [ ]`, checkboxes `- [ ]`; nest every task under the DEEPEST bullet carrying its context — a task that follows from one item is a CHILD of that item (one level deeper, after its detail sub-bullets), never a sibling of it; node level only for tasks about the whole node; top-level only when nothing fits; never emit `#tags`; new standalone notes need a backlink (Point 2); the daily note is NOT an automatic mirror (Point 7) — a NEWLY CREATED standalone note gets ONE reachability bullet ([[Note Title]] + a handful of words, no sub-bullets), and edits to existing notes plus session narration (decisions, files touched, commits, verifications, skill updates) get NOTHING unless Simon asked for it; when he DID ask, write it in full per Point 6.\"}} else empty end'"
+            "command": "jq -r 'if ((.tool_input.file_path // \"\") | contains(\"iCloud~app~reflect/Documents/simonsummermatter\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"Editing a Reflect graph file — reflect-note rules: daily-note writes go ONLY under the `AI Assistant` heading (legacy `Assistant`) in the inbox zone below the LAST `---` divider; match the heading by name at any `#` level and preserve its style; if missing, create `## [[AI Assistant]]` at the very end of the note; never change anything above the last divider; never write under `Scratch Pad`, `Links`, or `Audio Memos`; nest under `- [[➡️ node]]` when it obviously matches (search `#node ➡️` first); lead each item with a bold action-title one-liner, then MATCH THE STRUCTURE TO THE AMOUNT OF CONTENT — little content or a requested short/kurze note = ONE bullet, ideally one line, no sub-bullets and no padding to reach a bullet count; much content = detail broken into nested sub-bullets, never a flat mega-bullet or a block of prose; a short note still keeps its `- [[➡️ node]]` parent bullet; cite ob1 memories as `ob1: 1170 / 1123` — numbers only, NEVER `#1170`, because a leading # creates an unwanted Reflect tag; tasks `+ [ ]`, checkboxes `- [ ]`; nest every task under the DEEPEST bullet carrying its context — a task that follows from one item is a CHILD of that item (one level deeper, after its detail sub-bullets), never a sibling of it; node level only for tasks about the whole node; top-level only when nothing fits; never emit `#tags`; new standalone notes need a backlink (Point 2); the daily note is NOT an automatic mirror (Point 7) — a NEWLY CREATED standalone note gets ONE reachability bullet ([[Note Title]] + a handful of words, no sub-bullets), and edits to existing notes plus session narration (decisions, files touched, commits, verifications, skill updates) get NOTHING unless Simon asked for it; when he DID ask, write it in full per Point 6.\"}} else empty end'"
           }
         ]
       }
