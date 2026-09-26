@@ -346,6 +346,16 @@ them, and every proposed rule names the evidence that forced it. **A review that
 changed rules has almost certainly not looked hard enough.** Read `assets/CONCEPT.md` before
 amending anything, and record the amendment's evidence there.
 
+**Ask two questions of every rule, not one.** «Does it name its evidence» catches a rule that was
+never measured. «Does any document actually obey it» catches a rule everything silently ignores,
+which is the worse kind, because it stays invisible until compliance is counted. *Evidence: «prose
+gets one sentence per line» stood for three days, obeyed by nothing — not even the file stating it —
+and every reading that checked for evidence walked past it.*
+
+`assets/CONCEPT.md` ends with a **standing agenda**: two questions settled provisionally while the
+method was packaged, each waiting on this review. Open it and close them, or write down why they
+stay open.
+
 ## What this method deliberately does not do
 
 - **It does not try to prevent mistakes.** Several of the findings above were only reachable by

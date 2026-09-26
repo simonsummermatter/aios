@@ -326,3 +326,38 @@ shape, and the first trial drew it in one sitting.
 - **It does not archive by deleting.** A closed topic keeps its identity and its reasoning
   where it already sits. Deleting the reasoning is how a project loses the answer to
   "why did we decide that?".
+
+## The standing agenda for the first method review
+
+Two questions were settled deliberately and provisionally while the method was being packaged, and
+both were settled the same way: *not now, and here is the trigger*. They are written down because a
+decision that lives in a session's closing reply is lost when the terminal closes, and the workspace
+these were decided in was deleted on purpose. `PLAYBOOK.md` §11 opens this list; the review closes
+each item or records why it stays open.
+
+### 1. One dropped rule, kept recoverable
+
+The earlier and weaker skill this method replaced carried one rule that did not come across:
+**«never bypass or work around a rule to make an obstacle go away — stop and report instead».**
+
+It is sound, and it was dropped anyway. No measurement in the evidence base forced it, and the rule
+that a rule with no evidence does not ship is the rule that gives the whole method its authority —
+so carrying this one in would have broken the method to save a maxim. Everything else in that skill
+was absorbed.
+
+**It is a candidate to re-admit at this review, and only if the work has by then produced the
+evidence.** A session that worked around a rule instead of stopping, and what that cost, is the
+measurement to look for. Absent that, it stays out.
+
+### 2. `SKILL.md`'s length, and the direction it is moving
+
+The body grew across three consecutive sessions — 241 lines at the draft, 274 after the cold read,
+355 after the trial — and it is loaded in full every session. Every added line is a measurement or a
+step, which is what the evidence rule demands, so nothing in the growth is waste. The trend is still
+a trend.
+
+**Settled as: leave it until this review.** The evidence sitting in the body is what stopped the
+trial session inventing rules, and the trial had only just supplied half of it. **If the file does
+turn out to be too long to load every session, the fix is fewer rules, not thinner ones** — moving
+the evidence sentences into this file would leave the body asserting rules it cannot justify, which
+is the failure the cold read was run to catch.

@@ -384,4 +384,17 @@ artefacts the sessions produced, not memories of them, and every proposed rule n
 that forced it. Amendments are recorded in `CONCEPT.md`, with their evidence, before they are
 written into this playbook.
 
+**Two tests, not one.** Asking «does every rule name its evidence» finds a rule that was never
+measured. It does not find a rule that everything silently ignores, and that is the worse of the two
+because it is invisible until compliance is measured. So the review also asks, of each rule,
+**«does any document actually obey this?»** — and answers it by counting, not by remembering.
+
+*Evidence:* «prose gets one sentence per line» stood in the playbook for three days and had never
+been obeyed by anything, including the file that stated it — 61 multi-sentence lines in `SKILL.md`,
+100 in the playbook, 664 in the reference project's record. Every reading that checked for evidence
+had passed over it. Only counting found it.
+
+**The review opens the standing agenda below**, in `CONCEPT.md`, and closes each item or writes down
+why it stays open.
+
 A review that produces no changed rules has almost certainly not looked hard enough.
