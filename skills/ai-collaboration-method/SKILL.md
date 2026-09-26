@@ -47,13 +47,18 @@ The method fixes **roles**, not filenames. A project chooses its names once, rec
 | subject concept | `docs/<subject>/CONCEPT.md` | the role, and that it carries no version |
 | hand-over prompt | `⭐HANDOVER.md` at the repository root | the role, and that **the path never changes once chosen** |
 
-Two constraints on those names are not negotiable, and both are measured:
+Three constraints on those names are not negotiable, and each is measured:
 
 - **The hand-over file never moves.** Measured 2026-09-23: moving it and rewriting it in one
   commit defeats git's rename detection, so `git log -p` on the path — which is the entire
   archive of every hand-over — stops reaching back past the move.
-- **Governance, record and hand-over sit together at the repository root**, because they are the
-  three files a session opens first.
+- **Governance, record and hand-over sit together at the repository root.** They are the three
+  files a session opens first, and the root is what makes them findable. Measured 2026-09-23: an
+  ornament in a filename does not sort it first — macOS collation ignores the symbol, git sorts by
+  raw bytes and puts it last, and git output prints the name as escaped octal. Being found first
+  comes from the location, never from the decoration.
+- **The version appears in the release plan's path and nowhere else** — the filing rule below
+  carries the measurement.
 
 Placeholders this method leaves to the project stub: the dev-environment bring-up, the
 documentation language, the id scheme the commit prefix derives from, the memory layer, and the
@@ -68,10 +73,17 @@ the running record, one written hand-over — **and it ends there**.
 
 1. Read the hand-over file. It is this session's prompt: topic, reading order, state, the single
    next step, constraints.
-2. Read `README.md`, the last four entries of `STATUS.md`, and only the runbook entries the
-   hand-over names. Not the whole runbook.
-3. Search the memory layer once for the topic, and say so in the first reply.
-4. Bring the dev environment up as the project stub describes.
+2. Read the project's `docs/method/PROJECT.md`. It fills every placeholder this method leaves
+   open — the id scheme the commit prefix derives from, which memory layer step 4 searches, the
+   documentation language, and the project's own names for the five documents.
+3. Read the governance file, the last four entries of the running record, and only the runbook
+   entries the hand-over names. Not the whole runbook.
+4. Search the memory layer once for the topic, and say so in the first reply.
+5. Bring the dev environment up as the project stub describes.
+
+**If there is no hand-over file and no stub, this is a set-up session and not a working one.**
+The sequence above has nothing to read until those exist: read `assets/PLAYBOOK.md` §0 and create
+the stub from `assets/PROJECT-STUB.md` first.
 
 **During:** stay on the topic. Work that turns out to be needed but is outside it is **raised as
 a new topic** and executed only if the human says so in this session. If something outside the
@@ -154,6 +166,10 @@ cannot do, which is show up in a thirty-heading outline.*
 | `⭐HANDOVER.md` | the next session's prompt | anything that exists nowhere else |
 | `docs/archive/` | `STATUS.md` quarterly cuts | shipped releases — they stay in their `vN/` |
 | the memory layer | durable cross-project facts, decisions, preferences | live task tracking |
+| `docs/method/PROJECT.md` | this project's placeholder values | any rule of the method itself |
+
+This table names the roles by their default filenames for readability; on a project that chose
+other names, its own stub holds the mapping.
 
 **Nothing is written in two of them.** If a finding seems to belong in two, it belongs in
 `STATUS.md` and the other place links to it. *Evidence: one step's runbook block reached 23 KB
@@ -169,7 +185,9 @@ that a subject concept is rewritten rather than forked only comes due when a sec
 changes that subject. Treat that half as unproven.
 
 Full filing and chaptering rules — freeze-at-ship, chapters by subject then by work order, the
-in-flight header line — are in `assets/PLAYBOOK.md` §5.
+in-flight header line — are in `assets/PLAYBOOK.md` §5. The running record is cut to
+`docs/archive/` per quarter once it passes roughly 60 KB, newest entries staying in place;
+`assets/PLAYBOOK.md` §10 has that and the record's header-line rule.
 
 ## The formatting law
 
@@ -177,11 +195,20 @@ in-flight header line — are in `assets/PLAYBOOK.md` §5.
   bullets under it.
 - **Tables are for short, comparable attributes**: at most four columns, one line per cell. A
   cell that wants a command, a list, a measurement or a paragraph means it is not a table.
-- **Prose gets one sentence per line.** It renders identically and makes diffs reviewable.
+- **Prose is hard-wrapped at a consistent width** — about 100 characters — so that a correction
+  touches only the lines it changes. One paragraph is one idea. The exception is the hand-over
+  prompt, which is never wrapped at all: see the close checklist.
 
 *Evidence: one table row reached 12,765 characters on a single line and five more passed 1,700.
 Such a row cannot be read, cannot be reviewed in a diff — a one-word fix rewrites the whole
 line — and cannot hold a command or a measurement.*
+
+*The wrapping rule was amended on 2026-09-26. It previously read «prose gets one sentence per
+line», which no document in the method had ever followed — 61 such lines in this file, 100 in the
+playbook, 664 in the reference project's record. An unobserved rule is the failure the method
+already named once: a written rule the work has silently outgrown is worse than none, because it
+is still being quoted. What the measurement above actually supports is a reviewable diff, and
+consistent wrapping delivers that.*
 
 ## The commit rule
 
@@ -192,6 +219,12 @@ line — and cannot hold a command or a measurement.*
 - Any number of commits per session. **One `STATUS.md` entry per session is not negotiable** —
   the commits are the trace, the entry is the record.
 - **The agent commits. The agent never pushes.** The human pushes.
+
+*Evidence: at the review of 2026-09-23 the reference project had three prefix vocabularies in use
+at once — `DevOps:`/`Docs:`, then `S<n>:`, then `H<n>:` — and its step S10 had run to 14 commits
+across three days, absorbing three unrelated topics under one prefix. A chosen prefix drifts,
+because nothing outside the author's memory holds it; a prefix derived from the topic id cannot,
+because the id already exists before the commit does.*
 
 ## Closing a session — the six-point checklist
 

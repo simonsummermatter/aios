@@ -33,7 +33,8 @@ about the names are fixed, and each is measured:
 
 - **`<HANDOVER>`'s path never changes once chosen** (§8's measurement).
 - **`<GOVERNANCE>`, `<RECORD>` and `<HANDOVER>` sit together at the repository root**, being the
-  three files a session opens first.
+  three files a session opens first. The root is also what makes them findable rather than any
+  ornament in the name — §8's collation measurement.
 - **The version appears in `<PLAN>`'s path and nowhere else** (§5).
 
 ## 1. Starting a session
@@ -250,7 +251,11 @@ neither can be closed without seeing the other.
   heading with bullets underneath it.
 - **Tables are for short, comparable attributes**: at most four columns, one line per cell. If a
   cell wants a command, a list, a measurement or a paragraph, it is not a table.
-- **Prose gets one sentence per line.** It renders identically and makes diffs reviewable.
+- **Prose is hard-wrapped at a consistent width** — about 100 characters — so a correction touches
+  only the lines it changes, and one paragraph is one idea. `<HANDOVER>`'s prompt is the one
+  exception and is never wrapped (§8). *Amended 2026-09-26: this read «one sentence per line»,
+  which no document in the method had ever followed — 61 such lines in `SKILL.md`, 100 in this
+  file, 664 in the reference project's `<RECORD>`. See `CONCEPT.md` principle 5.*
 - Headings and bullets are the default for everything else. A document that needs a big table
   almost always needs a section.
 
@@ -265,6 +270,12 @@ neither can be closed without seeing the other.
 - Any number of commits per session is fine. **One `<RECORD>` entry per session is not
   negotiable** — the commits are the trace, the entry is the record.
 - **The agent commits and never pushes.** The human pushes.
+
+*Evidence: at the review of 2026-09-23 the reference project had three prefix vocabularies live at
+once — `DevOps:`/`Docs:`, then `S<n>:`, then `H<n>:` — and step S10 had reached 14 commits over
+three days, absorbing three unrelated topics under a single prefix. A chosen prefix drifts because
+nothing outside the author's memory holds it; a derived one cannot, the id existing before the
+commit does.*
 
 ## 8. The hand-over file
 

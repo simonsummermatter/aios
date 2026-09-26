@@ -7,7 +7,7 @@ leaves open. **No rule of the method is restated here** — the method lives in 
 ends up copying the folder instead of loading the skill.
 
 Everything below is a project choice. The *roles* are fixed by the method; the names are not,
-except for the three constraints named in `PLAYBOOK.md` §0.
+except for the three constraints named in `PLAYBOOK.md` §0 and in the skill body.
 
 ---
 
@@ -31,7 +31,8 @@ be changed again once a session has been handed over — see `PLAYBOOK.md` §8.)
 
 ## `<DEV-BRINGUP>` — bringing the dev environment up
 
-> The exact commands a session runs at step 1.4, in order, with anything that must be true first.
+> The exact commands a session runs when bringing the environment up at the start of a session,
+> in order, with anything that must be true first.
 > Example shape: `ssh` to the dev host, start the containers, sync, install.
 
 ## `<ID-SCHEME>` — topic ids, from which the commit prefix derives

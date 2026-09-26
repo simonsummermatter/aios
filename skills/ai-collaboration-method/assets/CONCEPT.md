@@ -136,6 +136,16 @@ line — and cannot hold a command, a list, or a measurement.
 
 Tables are for short, comparable attributes. Everything longer is headings and bullets.
 
+*Amended 2026-09-26.* The playbook had carried a second clause under this principle — «prose gets
+one sentence per line» — which this principle's measurement never supported and which no document
+in the method had ever obeyed: 61 multi-sentence lines in `SKILL.md`, 100 in `PLAYBOOK.md`, 664 in
+the reference project's status file. That is the failure named in *What a session is*: a written
+rule the work has silently outgrown is worse than no rule, because it is still being quoted. The
+measurement supports a diff a person can review, and consistent hard wrapping at about 100
+characters delivers that while being what every document already does. The rule now states the
+practice. The hand-over prompt stays the deliberate exception, unwrapped, because a pasted prompt
+carrying fixed line breaks reads as broken text.
+
 ### 6. Every session hands over in writing
 
 A session ends by writing the prompt that starts the next one: what it is, what to read,
