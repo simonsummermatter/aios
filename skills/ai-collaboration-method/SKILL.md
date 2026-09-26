@@ -37,13 +37,20 @@ that is not enough:
 ## What is method and what is one project's choice
 
 The method fixes **roles**, not filenames. A project chooses its names once, records them in its
-`docs/method/PROJECT.md` stub (`assets/PROJECT-STUB.md`), and never changes them.
+project stub (`assets/PROJECT-STUB.md`), and never changes them.
+
+**The stub lives in the project's own documentation folder, under `method/`** — `docs/method/PROJECT.md`
+where that folder is `docs/`, `DOCUMENTATION/method/PROJECT.md` where it is not. *Evidence: measured
+2026-09-26 on the first project outside the one the method came from. Its documentation tree has been
+`DOCUMENTATION/` for thirty files; creating `docs/` beside it to satisfy a fixed path would have given
+one role two homes, which is the thing this method's own filing rule forbids.* The hand-over names the
+path, so no session has to guess.
 
 | Role | Default name | Fixed by the method? |
 | --- | --- | --- |
 | governance | `README.md` | the role, not the name |
-| running record | `STATUS.md` | the role, and **one entry per session** |
-| release plan | `docs/delivery/vN/RUNBOOK.md` | the role, and that the version sits here and nowhere else |
+| running record | `STATUS.md` | the role, and **one entry per session** — see the name check below |
+| release plan | `docs/delivery/vN/RUNBOOK.md` | the role, and that a version, **if there is one**, sits here and nowhere else |
 | subject concept | `docs/<subject>/CONCEPT.md` | the role, and that it carries no version |
 | hand-over prompt | `⭐HANDOVER.md` at the repository root | the role, and that **the path never changes once chosen** |
 
@@ -57,8 +64,19 @@ Three constraints on those names are not negotiable, and each is measured:
   ornament in a filename does not sort it first — macOS collation ignores the symbol, git sorts by
   raw bytes and puts it last, and git output prints the name as escaped octal. Being found first
   comes from the location, never from the decoration.
-- **The version appears in the release plan's path and nowhere else** — the filing rule below
-  carries the measurement.
+- **If the project has versions, the version appears in the release plan's path and nowhere else**
+  — the filing rule below carries the measurement. **A project with no releases has no version, and
+  invents none.** *Evidence: measured 2026-09-26 — a continuously-operated estate repository whose
+  plans are migrations that finish and become history. There is no `v1`; a `vN/` segment added to
+  satisfy the rule would have put a state into an address for no reader's benefit, which is the exact
+  failure the rule exists to prevent.*
+
+**Before taking a default name, check what already holds it.** A file may carry the method's default
+name and do a different job, and adopting the method then quietly files session entries into a
+document that is not a record. If the name is taken, the role takes a new name and the stub records
+why. *Evidence: measured 2026-09-26 — a project whose `STATUS.md` is 253 KB organised by component,
+as the live state of an estate. It is not a running record and never was; only measuring it before
+writing to it caught that.*
 
 Placeholders this method leaves to the project stub: the dev-environment bring-up, the
 documentation language, the id scheme the commit prefix derives from, the memory layer, and the
@@ -73,17 +91,25 @@ the running record, one written hand-over — **and it ends there**.
 
 1. Read the hand-over file. It is this session's prompt: topic, reading order, state, the single
    next step, constraints.
-2. Read the project's `docs/method/PROJECT.md`. It fills every placeholder this method leaves
-   open — the id scheme the commit prefix derives from, which memory layer step 4 searches, the
+2. Read the project's method stub — `docs/method/PROJECT.md`, or the same path under whatever the
+   project's documentation folder is called; the hand-over names it. It fills every placeholder
+   this method leaves open — the id scheme the commit prefix derives from, which memory layer step 4 searches, the
    documentation language, and the project's own names for the five documents.
 3. Read the governance file, the last four entries of the running record, and only the runbook
    entries the hand-over names. Not the whole runbook.
 4. Search the memory layer once for the topic, and say so in the first reply.
 5. Bring the dev environment up as the project stub describes.
 
-**If there is no hand-over file and no stub, this is a set-up session and not a working one.**
-The sequence above has nothing to read until those exist: read `assets/PLAYBOOK.md` §0 and create
-the stub from `assets/PROJECT-STUB.md` first.
+**If there is no hand-over file and no stub, setting the project up is this session's first topic.**
+The sequence above has nothing to read until those exist: read `assets/PLAYBOOK.md` §0 and create the
+stub from `assets/PROJECT-STUB.md` first. **Then do real work in the same session**, and write the
+stub's deviations from what that work exposes rather than from reading the repository.
+
+*Evidence: amended 2026-09-26. This previously read «a set-up session and not a working one». The
+first set-up outside the method's home project produced five deviations, and **not one of them was
+visible while filling the stub in** — the record's name came from measuring a 253 KB file before
+writing to it, and the risk-marker deviation below came from executing against a runbook that uses
+them. A set-up session with no work to test the set-up against fills the stub with defaults.*
 
 **During:** stay on the topic. Work that turns out to be needed but is outside it is **raised as
 a new topic** and executed only if the human says so in this session. If something outside the
@@ -125,7 +151,17 @@ Rules that change what you write stick; rules that ask you to remember something
 ## The state vocabulary
 
 One notation, never varied. No strikethrough, no deleting, and **no row ever moves to another
-table**. One emoji only: the ✅ below.
+table**. One emoji for state: the ✅ below.
+
+**Risk class is not state, and may carry its own markers** — «this one blocks others», «this one
+cannot be undone» — provided they are declared in the project stub and are never used to say that
+something is done. *Evidence: amended 2026-09-26. The rule previously read «one emoji only», and the
+first project it met used nine. Measured against the failure the rule was written for — five ways of
+saying «done» in one file — only one of the nine competed with the state words. `⛔ GATE` and
+`☠️ POINT OF NO RETURN` say something the state vocabulary cannot: an **Open** step that is
+irreversible and an **Open** step that is free are not the same decision to a human choosing what to
+do tonight. A rule that forbids the only notation for a real distinction gets ignored, and this
+method has already measured what an ignored rule costs.*
 
 - Executable lines are GitHub task lists: `- [ ]` open, `- [x]` done.
 - A topic or step carries **one bold state word**, and a date once it leaves *Open*:
@@ -214,6 +250,12 @@ consistent wrapping delivers that.*
 
 - **The prefix is derived, not chosen: it is the id of the topic the commit advances** —
   `S11: …`, `H20: …`, `method: …`, `skill: …`.
+- **Where a commit convention already owns the prefix, the id goes in the subject line instead** —
+  `feat(vlan): unit 4b done — …`. What the rule protects is that the marker is *derived* rather than
+  chosen, and a scope taken from the plan that owns the work delivers that. *Evidence: measured
+  2026-09-26 — a project on Conventional Commits since it began, with a 164 KB changelog built on
+  that vocabulary. Replacing the prefix would have cost the changelog to buy a property the scope
+  already provides.*
 - **Work on a different topic is a different commit.** Never file one topic's work under
   another's prefix.
 - Any number of commits per session. **One `STATUS.md` entry per session is not negotiable** —
@@ -234,7 +276,10 @@ asking — closing is not a decision the human should have to authorise each tim
 
 A session is closed when **all six** are done. Five of six is an open session.
 
-1. **The topic is marked** in the runbook with the state vocabulary above.
+1. **The topic is marked** in the runbook with the state vocabulary above, **and the topic the
+   hand-over names next has a section of its own to open.** Open the plan and look for it. A next
+   step that exists only as a row in a table, or only in the prompt, is not yet a topic — give it
+   its heading and its id before writing the hand-over.
 2. **The project documents are pulled onto the built state** — concept, runbook, `README.md` —
    wherever the session changed what is true. A concept describing the plan instead of the thing
    is worse than no concept.
@@ -251,8 +296,14 @@ it, do not read the files it names. The session ends at the commit.
 
 **The hand-over prompt** addresses an agent with **zero context**: what this session is and,
 where it matters, what it is *not*; what to read, in what order, how much; the state in about
-three lines; the single next step; the constraints. No history, no recap beyond what the next
-step needs. Not hard-wrapped — one paragraph is one line, because a pasted prompt with fixed
+three lines; the single next step, **which must name a heading that already exists in the plan**;
+the constraints. No history, no recap beyond what the next step needs.
+
+*Evidence for both, measured 2026-09-26: a session closed by naming unit 4c as the next step. The
+unit existed as one row in a table and had no section anywhere. The human's reply was «I don't see
+this task in the runbook, where is this?» — and because that project had no hand-over file, the
+prompt itself lived only in the terminal and died with it. The prompt was accurate and still
+unusable, which is why this is checked against the plan rather than proof-read.* Not hard-wrapped — one paragraph is one line, because a pasted prompt with fixed
 line breaks reads as broken text. Meta and prompt are visibly separated and the prompt is one
 fenced ```text block, so copying it takes one click and no judgement. Shape and rules in full:
 `assets/PLAYBOOK.md` §8.

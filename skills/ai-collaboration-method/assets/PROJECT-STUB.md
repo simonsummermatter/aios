@@ -1,7 +1,8 @@
 # The method on this project — stub template
 
-Copy this file into a project as `docs/method/PROJECT.md`, fill it in once at the start, and do
-not change it afterwards. It holds **only** this project's answers to the placeholders the method
+Copy this file into a project as `method/PROJECT.md` inside the project's own documentation folder
+— `docs/method/PROJECT.md` where that folder is `docs/`, `DOCUMENTATION/method/PROJECT.md` where it
+is not. Fill it in once at the start, and do not change it afterwards. It holds **only** this project's answers to the placeholders the method
 leaves open. **No rule of the method is restated here** — the method lives in the
 `ai-collaboration-method` skill, and a second copy beside the project is how the next project
 ends up copying the folder instead of loading the skill.
@@ -25,6 +26,10 @@ filing rules are in that skill. This file fills in its placeholders.
 | `<PLAN>` | `docs/delivery/vN/RUNBOOK.md` |
 | `<CONCEPT>` | `docs/<subject>/CONCEPT.md` |
 | `<HANDOVER>` | `⭐HANDOVER.md` at the repository root |
+
+**Before taking a default name, check what already holds it** — a file can carry the name and do a
+different job, and the record is where that happens. If the name is taken, choose another and say
+so under the deviations below.
 
 *(Change a name only if there is a reason, and record the reason. `<HANDOVER>`'s path can never
 be changed again once a session has been handed over — see `PLAYBOOK.md` §8.)*
@@ -59,8 +64,15 @@ be changed again once a session has been handed over — see `PLAYBOOK.md` §8.)
 > `PLAYBOOK.md` §5 says it is settled once, at the start, because re-filing later is the one cost
 > the method has measured and cannot avoid twice.
 
+## Risk markers this project uses
+
+> The state vocabulary is fixed by the method. **Risk class is not state** — «this blocks others»,
+> «this cannot be undone» — and a project that needs to mark it declares its markers here, once.
+> Leave empty if there are none.
+
 ## Deviations from the method, with their evidence
 
-> Empty is the normal state. A deviation is written here with the evidence that forced it, in the
+> Empty is the normal state — but it is not the expected state on the first project. The first
+> adoption outside the method's home project produced five, each measured. A deviation is written here with the evidence that forced it, in the
 > same shape the method demands of its own rules — and if it holds up, it is carried back into
 > the skill at the next method review rather than living on here.

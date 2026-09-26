@@ -262,6 +262,60 @@ choosing the next project and pushing three commits, were unlabelled and last. T
 also had to fix the marker around the pasted prompt, which rendered as an italic quoted block
 merging into the prose it was supposed to be separated from.*
 
+## The first trial outside the home project — 2026-09-26
+
+Every principle above was measured on one repository, the product project the method was extracted
+from. On 2026-09-26 the method was loaded from the installed skill onto an unrelated repository — a
+continuously-operated infrastructure estate, mid-way through a network migration with real risk —
+and used to set that project up and to prepare one unit of its own work. **Seven rules failed, and
+they failed in one direction: each had quietly assumed a property only the home project had.** They
+are amended in `SKILL.md`, and the measurements are here.
+
+**Portability is not proven by a rule being general. It is proven by the rule meeting a project that
+is shaped differently.** The seven below read as general and were not.
+
+1. **The stub's own location was a fixed filename in a method that fixes roles.** The trial project's
+   documentation tree is `DOCUMENTATION/`, thirty files deep. Satisfying `docs/method/PROJECT.md`
+   would have created a second documentation root — one role, two homes, which principle 3 forbids.
+   The stub is now located relative to the project's own documentation folder.
+2. **The release plan assumed releases.** «The version appears in the plan's path and nowhere else»
+   was listed as non-negotiable. The trial project ships nothing; its plans are migrations that
+   finish and become history. The rule now binds only a project that has versions — and principle 8
+   is unharmed, because the failure it guards against is a version *becoming* an address, not the
+   absence of one.
+3. **The record's default name was already taken by a different role.** `STATUS.md` there is 253 KB
+   organised by component: the live state of an estate, not a session record. Taking the default
+   name would have filed session entries into a document whose job is something else. The method now
+   says to measure what holds a name before taking it.
+4. **The state vocabulary had no way to express risk class, so nine emoji had grown to cover it.**
+   Principle 4's measurement was five competing ways of saying «done». Only one of the trial
+   project's nine competed with anything: the rest say `⛔ GATE` and `☠️ POINT OF NO RETURN`. An
+   **Open** step that is irreversible and an **Open** step that is free are not the same decision,
+   and the vocabulary could not tell them apart. **Principle 4 is narrowed to what it actually
+   measured — state — and risk markers are admitted, declared per project.** The general form: a
+   rule that forbids the only notation for a real distinction does not remove the distinction, it
+   removes the rule's own authority, which is the failure principle 5 was already amended for.
+5. **«Set-up is not a working session» produced a stub filled with defaults.** Five deviations came
+   out of the trial and **none was visible while filling the stub in.** The record's name came from
+   measuring a file before writing to it; the risk markers came from executing against a runbook
+   that uses them. Set-up is now the first topic of a session that then does real work, because the
+   work is the only thing that tests the set-up.
+6. **The commit prefix assumed no convention was already in place.** The trial project has used
+   Conventional Commits since it began, with a 164 KB changelog built on that vocabulary. The
+   property the rule protects is that the marker is *derived* rather than chosen; a scope taken from
+   the plan that owns the work delivers it. The id moves to the subject line.
+7. **Nothing required the next step to have somewhere to go.** A session closed by naming unit 4c;
+   the unit existed as one row in a table and had no section anywhere; the human's reply was «I
+   don't see this task in the runbook, where is this?». The prompt was accurate and unusable.
+   Principle 6 said every session hands over in writing and never said the thing handed over must be
+   addressable. **The close now checks the next topic against the plan.**
+
+**What the trial did not find.** Nothing in the evidence rule, the two-layer rule, the filing rule or
+the closing reply needed changing, and the six-point close ran unmodified apart from the addition in
+7. The rules that survived are the ones about *what you write down*; every rule that failed was about
+*where a file sits or what it is called*. That is the boundary between the method and one project's
+shape, and the first trial drew it in one sitting.
+
 ## What this method deliberately does not do
 
 - **It does not try to prevent mistakes.** Four of the findings above were only reachable by

@@ -7,7 +7,8 @@ read when setting a project up, when writing a runbook or hand-over for the firs
 
 This playbook is binding for sessions on a project that runs the method. It is written to be
 portable: everything a project must decide for itself is a **named placeholder**, listed in §0
-and filled in that project's `docs/method/PROJECT.md` (template: `PROJECT-STUB.md`). No other
+and filled in that project's method stub — `method/PROJECT.md` inside the project's own
+documentation folder, whatever it is called (template: `PROJECT-STUB.md`). No other
 line needs changing.
 
 ## 0. The placeholders, and what is method rather than project
@@ -28,14 +29,20 @@ A project fills these once, at the start, and does not change them:
 | `<REVIEW-POINT>` | when the method itself gets reviewed |
 
 **The method fixes the roles, not the names.** Any of the five documents may be called something
-else, provided each role has exactly one home and no document holds two roles. Three things
+else, provided each role has exactly one home and no document holds two roles.
+
+**Check what already holds a default name before taking it.** A file may carry the default name and
+do a different job — measured 2026-09-26 on a project whose `STATUS.md` is 253 KB of component state
+rather than session entries. Where the name is taken, the role takes a new one and the stub says why. Three things
 about the names are fixed, and each is measured:
 
 - **`<HANDOVER>`'s path never changes once chosen** (§8's measurement).
 - **`<GOVERNANCE>`, `<RECORD>` and `<HANDOVER>` sit together at the repository root**, being the
   three files a session opens first. The root is also what makes them findable rather than any
   ornament in the name — §8's collation measurement.
-- **The version appears in `<PLAN>`'s path and nowhere else** (§5).
+- **The version, if the project has one, appears in `<PLAN>`'s path and nowhere else** (§5). A
+  project that releases nothing has no version and invents none — measured 2026-09-26 on an estate
+  repository whose plans are migrations rather than releases.
 
 ## 1. Starting a session
 
