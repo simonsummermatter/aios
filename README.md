@@ -11,6 +11,8 @@ skills/
 ├── <skill-name>/
 │   ├── SKILL.md         # frontmatter + body, the skill definition
 │   └── assets/          # optional, only when frontmatter sets has_assets: true
+docs/                    # human-readable manuals, never synced into a harness
+└── OB1_USER_MANUAL.md   # what ob1 (Open Brain) is and how it behaves, for a user
 ```
 
 ## Frontmatter contract
