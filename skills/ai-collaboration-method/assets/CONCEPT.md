@@ -53,10 +53,10 @@ days and fourteen commits and absorbed three unrelated topics along the way. Not
 wrong with the work — the rule was wrong about the work. **A written rule that the project
 has silently outgrown is worse than no rule, because it is still being quoted.**
 
-## The eight principles
+## The nine principles
 
-Seven were written on 2026-09-23; the eighth was added on 2026-09-26 and is the newest and the
-least proven.
+Seven were written on 2026-09-23; the eighth and ninth were added on 2026-09-26 and are the
+newest and the least proven.
 
 ### 1. Documentation is written for the person who was not there
 
@@ -235,6 +235,32 @@ describes behaviour that is partly built and partly not, and a reader cannot tel
 header line — «As built: … · In flight: …» — fixes that, and nothing is marked per section unless
 the ambiguity actually bites. Without it the rule is unusable from the second release onwards,
 which is why v1 got away without noticing.
+
+### 9. The closing reply is an instruction to one person, not a report
+
+Everything a session produces is already written down: the record holds what happened, the plan
+holds what is open, the hand-over holds what comes next. The reply that ends the session
+therefore has nothing to preserve. Its only job is to tell the human what he now has to do, and
+it competes with nothing — so anything in it that is not an instruction is noise that hides the
+instruction.
+
+Two failures follow from ignoring that. A reply that recounts the session buries the one thing
+the human must act on. And a decision raised for the first time at the close arrives after the
+work it should have shaped is finished, which makes it both expensive to answer and pointless to
+have asked. The rule that follows is therefore about *when*, not only about *length*: decisions
+go to the human as they appear, mid-session, and the close is short because nothing was saved up
+for it.
+
+Anything the human must decide is also written into the plan or the record before the reply is
+sent. A reply is not storage. The terminal is closed, the decision is gone, and the next session
+starts without it.
+
+*Evidence: on 2026-09-26 the session that installed this method's own skill closed with a
+two-page reply. Every statement in it was true and every statement was already in the record.
+The human's response was «not sure what I need to do» — and the two items he had to act on,
+choosing the next project and pushing three commits, were unlabelled and last. The same session
+also had to fix the marker around the pasted prompt, which rendered as an italic quoted block
+merging into the prose it was supposed to be separated from.*
 
 ## What this method deliberately does not do
 

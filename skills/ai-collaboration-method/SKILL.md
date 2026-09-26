@@ -242,8 +242,8 @@ A session is closed when **all six** are done. Five of six is an open session.
    session must know, with its plain-language layer.
 4. **Durable facts go to the memory layer**, one idea per entry, as plain statements.
 5. **The hand-over file is overwritten** with the next session's prompt, and the same text is
-   printed in the reply between `>>> PROMPT START >>>` and `<<< PROMPT END <<<` with nothing
-   else between the markers. Same text in both places, so there is nothing to keep in sync.
+   printed in the reply as one fenced `text` block, under a plain heading that names it, with
+   nothing else inside the fence. Same text in both places, so there is nothing to keep in sync.
 6. **Committed locally** with the derived prefix. **Never pushed.**
 
 **Then stop.** Do not begin the next topic, do not «just start» it because the human agreed to
@@ -256,6 +256,36 @@ step needs. Not hard-wrapped — one paragraph is one line, because a pasted pro
 line breaks reads as broken text. Meta and prompt are visibly separated and the prompt is one
 fenced ```text block, so copying it takes one click and no judgement. Shape and rules in full:
 `assets/PLAYBOOK.md` §8.
+
+
+## The closing reply
+
+The reply that closes a session is for the human, not for the record. The record is the running
+record, the plan is the runbook, the next session is the hand-over file. The reply exists to tell
+one person what they now have to do. It has three parts, in this order, and nothing else.
+
+1. **What you need to decide.** Only what genuinely blocks delivery. Each item is three short
+   lines: the problem, the options, the recommendation. Every item is **also written into the
+   runbook or the running record before the reply is sent**, because the human may not act today
+   and a decision that exists only in a reply dies when the terminal is closed. If there is
+   nothing to decide, say so in one line.
+2. **What was done.** Information only, and labelled as information. A few lines. The detail is
+   already in the running record, and repeating it here is how a reply turns into a report that
+   nobody reads.
+3. **The prompt for the next session**, as one fenced block.
+
+**Parts 1 and 2 are kept short by being handled earlier, not by being compressed at the end.**
+A decision the human has to make is raised the moment it appears, in the middle of the session,
+where it is cheap to answer and where the answer can still change the work. Saving it for the
+close is what produces both a long reply and a decision made too late to matter.
+
+**Simple language, precise, no abbreviations.** Short sentences. Only what the reader does not
+already know. Less is more.
+
+*Evidence: on 2026-09-26 a session closed with a reply two pages long. It was accurate and every
+word of it was already in the running record. The human's answer was «not sure what I need to
+do». The two things he actually had to act on — choose the next project, push three commits —
+were unlabelled and sat at the bottom under findings that were filed elsewhere already.*
 
 ## Reviewing the method itself
 

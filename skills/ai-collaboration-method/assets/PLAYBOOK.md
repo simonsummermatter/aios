@@ -96,13 +96,43 @@ A session is closed when **all six** of these are done. Five of six is an open s
    the next session must know, with its plain-language layer.
 4. **Durable facts go to `<MEMORY-LAYER>`**, one idea per entry, as plain statements.
 5. **`<HANDOVER>` is overwritten** with the prompt for the next session, and the same text is
-   printed in the reply between `>>> PROMPT START >>>` and `<<< PROMPT END <<<`, with nothing
-   else between the markers. Same text in both places, so there is nothing to keep in sync: the
-   file is the record, the markers are for copying straight out of the terminal.
+   printed in the reply as one fenced `text` block under a plain heading that names it, with
+   nothing else inside the fence. Same text in both places, so there is nothing to keep in sync:
+   the file is the record, the fenced block is for copying straight out of the terminal. *Amended
+   2026-09-26: this used `>>> PROMPT START >>>` and `<<< PROMPT END <<<` marker lines, which
+   rendered as a quoted, italicised block running into the surrounding prose and made the
+   boundary harder to see rather than easier. A fence is what the hand-over file itself uses.*
 6. **Committed locally** with the derived prefix. **Never pushed** — the human pushes.
 
 **Then stop.** Do not begin the next topic, do not «just start» it because the human agreed to
 it, do not read the files it names. The session ends at the commit.
+
+### The closing reply
+
+The reply that closes a session is written for the human, not for the record. `<RECORD>` is the
+record, `<PLAN>` is the plan, `<HANDOVER>` is the next session. The reply's only job is to tell
+one person what they now have to do. Three parts, in this order, and nothing else:
+
+1. **What the human needs to decide.** Only items that genuinely block delivery. Each one is
+   three short lines — the problem, the options, the recommendation — and each one is **written
+   into `<PLAN>` or `<RECORD>` before the reply is sent**. The human may not act today, and a
+   decision that exists only in a terminal reply is lost when the terminal is closed. Nothing to
+   decide is itself worth one line.
+2. **What was done.** Labelled as information. A few lines only; the detail is in `<RECORD>`.
+3. **The prompt**, as one fenced block (point 5 above).
+
+**Parts 1 and 2 are kept short by being handled earlier.** A decision the human must make is
+raised in the middle of the session, when it appears, where answering it is cheap and the answer
+can still change the work. Holding it back to the close produces a long reply and a decision made
+too late to be useful. Compressing at the end is not the fix; not accumulating is.
+
+**Simple language, precise, no abbreviations, short sentences.** Only what the reader does not
+already know.
+
+*Evidence: on 2026-09-26 a session closed with a two-page reply. It was accurate, and all of it
+was already written in `<RECORD>`. The human replied «not sure what I need to do». The two things
+he had to act on — choose the next project, push three commits — were unlabelled and sat at the
+bottom, under findings that were filed elsewhere already.*
 
 **What the hand-over prompt must be.** It addresses an agent with **zero context**. It names the
 files to read, the current state in one line, and the single next step. No history, no recap
